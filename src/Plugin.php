@@ -8,6 +8,7 @@
 namespace MailVitals;
 
 use MailVitals\Diagnostics\SiteHealth;
+use MailVitals\Mailer\Dispatcher;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -28,6 +29,7 @@ final class Plugin {
 	 * @return void
 	 */
 	public static function boot() {
+		Dispatcher::register();
 		SiteHealth::register();
 		Abilities::register();
 	}
