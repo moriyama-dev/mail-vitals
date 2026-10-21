@@ -1,0 +1,12 @@
+# Normalize line endings so the repository is identical on every machine.
+* text=auto eol=lf
+
+# Development tooling. Present in the repository, absent from source archives
+# (GitHub's "Download ZIP", `git archive`) so that what people download is the
+# plugin and nothing else.
+/.editorconfig   export-ignore
+/.gitattributes  export-ignore
+/.gitignore      export-ignore
+/.phpcs.xml.dist export-ignore
+/composer.json   export-ignore
+/composer.lock   export-ignore

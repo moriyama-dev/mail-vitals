@@ -1,0 +1,6 @@
+/vendor/
+/release/
+*.zip
+.env
+.phpcs.cache
+.phpunit.result.cache
