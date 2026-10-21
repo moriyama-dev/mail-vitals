@@ -7,6 +7,7 @@
 
 namespace MailVitals\Log;
 
+use MailVitals\Mailer\Dispatcher;
 use MailVitals\Mailer\Settings;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -92,7 +93,7 @@ final class Recorder {
 			return (string) $data['mail_vitals_transport'];
 		}
 
-		return Settings::transport();
+		return Dispatcher::current_id();
 	}
 
 	/**

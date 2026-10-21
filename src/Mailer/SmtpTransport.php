@@ -59,6 +59,10 @@ final class SmtpTransport implements Transport {
 	 * @return void
 	 */
 	public function configure( $mailer ) {
+		if ( ! Dispatcher::is_current( $this ) ) {
+			return;
+		}
+
 		$smtp = Settings::smtp();
 
 		/*

@@ -62,7 +62,7 @@ final class BrevoTransport implements Transport {
 	 * @return null|bool Null to let WordPress carry on, or the send result.
 	 */
 	public function send( $short_circuit, $atts ) {
-		if ( null !== $short_circuit ) {
+		if ( null !== $short_circuit || ! Dispatcher::is_current( $this ) ) {
 			return $short_circuit;
 		}
 
