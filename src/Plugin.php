@@ -10,6 +10,8 @@ namespace MailVitals;
 use MailVitals\Admin\SettingsPage;
 use MailVitals\Admin\TestSend;
 use MailVitals\Diagnostics\SiteHealth;
+use MailVitals\Log\Pruner;
+use MailVitals\Log\Schema;
 use MailVitals\Mailer\Dispatcher;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -31,6 +33,9 @@ final class Plugin {
 	 * @return void
 	 */
 	public static function boot() {
+		Schema::maybe_install();
+		Pruner::register();
+
 		Dispatcher::register();
 		SiteHealth::register();
 		Abilities::register();

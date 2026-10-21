@@ -60,16 +60,52 @@ final class Settings {
 		return wp_parse_args(
 			is_array( $stored ) ? $stored : array(),
 			array(
-				'transport'       => self::TRANSPORT_DEFAULT,
-				'from_address'    => '',
-				'from_name'       => '',
-				'force_from'      => false,
-				'smtp_host'       => '',
-				'smtp_port'       => 587,
-				'smtp_encryption' => 'tls',
-				'smtp_username'   => '',
+				'transport'          => self::TRANSPORT_DEFAULT,
+				'from_address'       => '',
+				'from_name'          => '',
+				'force_from'         => false,
+				'smtp_host'          => '',
+				'smtp_port'          => 587,
+				'smtp_encryption'    => 'tls',
+				'smtp_username'      => '',
+				'log_enabled'        => true,
+				'log_retention_days' => 30,
+				'log_max_rows'       => 5000,
 			)
 		);
+	}
+
+	/**
+	 * Whether sends should be written to the log at all.
+	 *
+	 * @return bool
+	 */
+	public static function log_enabled() {
+		$settings = self::all();
+
+		return ! empty( $settings['log_enabled'] );
+	}
+
+	/**
+	 * How many days of log to keep. Zero means no age limit.
+	 *
+	 * @return int
+	 */
+	public static function log_retention_days() {
+		$settings = self::all();
+
+		return max( 0, (int) $settings['log_retention_days'] );
+	}
+
+	/**
+	 * How many log entries to keep. Zero means no size limit.
+	 *
+	 * @return int
+	 */
+	public static function log_max_rows() {
+		$settings = self::all();
+
+		return max( 0, (int) $settings['log_max_rows'] );
 	}
 
 	/**

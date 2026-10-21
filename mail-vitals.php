@@ -31,4 +31,6 @@ require_once MAIL_VITALS_DIR . 'src/Autoloader.php';
 
 Autoloader::register();
 
+Lifecycle::register( __FILE__ );
+
 add_action( 'plugins_loaded', array( Plugin::class, 'boot' ) );

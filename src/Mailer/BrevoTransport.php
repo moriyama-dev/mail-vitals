@@ -146,6 +146,14 @@ final class BrevoTransport implements Transport {
 		$body = (string) wp_remote_retrieve_body( $response );
 
 		if ( $code >= 200 && $code < 300 ) {
+			/*
+			 * Core raises this after its own successful send. Raising it here
+			 * too means anything listening - the log included - hears about an
+			 * API send in exactly the way it hears about an SMTP one.
+			 */
+			/** This action is documented in wp-includes/pluggable.php */
+			do_action( 'wp_mail_succeeded', array_merge( $atts, array( 'mail_vitals_transport' => $this->id() ) ) );
+
 			return true;
 		}
 

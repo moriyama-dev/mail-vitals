@@ -7,6 +7,8 @@
 
 namespace MailVitals\Mailer;
 
+use MailVitals\Log\Recorder;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -17,12 +19,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Dispatcher {
 
 	/**
-	 * Start recording failures and hand sending to the configured transport.
+	 * Start recording outcomes and hand sending to the configured transport.
 	 *
 	 * @return void
 	 */
 	public static function register() {
-		FailureRecorder::register();
+		Recorder::register();
 		self::apply_from_overrides();
 
 		$transport = self::active();

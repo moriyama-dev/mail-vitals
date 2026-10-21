@@ -10,7 +10,8 @@ namespace MailVitals\Admin;
 use MailVitals\Diagnostics\DomainAuth;
 use MailVitals\Diagnostics\Finding;
 use MailVitals\Mailer\Dispatcher;
-use MailVitals\Mailer\FailureRecorder;
+use MailVitals\Log\Pruner;
+use MailVitals\Log\Store;
 use MailVitals\Mailer\Settings;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -114,14 +115,17 @@ final class SettingsPage {
 		$port = isset( $input['smtp_port'] ) ? absint( $input['smtp_port'] ) : 0;
 
 		return array(
-			'transport'       => in_array( $transport, $transports, true ) ? $transport : Settings::TRANSPORT_DEFAULT,
-			'from_address'    => is_email( $from ) ? $from : '',
-			'from_name'       => isset( $input['from_name'] ) ? sanitize_text_field( $input['from_name'] ) : '',
-			'force_from'      => ! empty( $input['force_from'] ),
-			'smtp_host'       => isset( $input['smtp_host'] ) ? sanitize_text_field( $input['smtp_host'] ) : '',
-			'smtp_port'       => ( $port > 0 && $port <= 65535 ) ? $port : (int) $current['smtp_port'],
-			'smtp_encryption' => in_array( $encryption, $encryptions, true ) ? $encryption : 'tls',
-			'smtp_username'   => isset( $input['smtp_username'] ) ? sanitize_text_field( $input['smtp_username'] ) : '',
+			'transport'          => in_array( $transport, $transports, true ) ? $transport : Settings::TRANSPORT_DEFAULT,
+			'from_address'       => is_email( $from ) ? $from : '',
+			'from_name'          => isset( $input['from_name'] ) ? sanitize_text_field( $input['from_name'] ) : '',
+			'force_from'         => ! empty( $input['force_from'] ),
+			'smtp_host'          => isset( $input['smtp_host'] ) ? sanitize_text_field( $input['smtp_host'] ) : '',
+			'smtp_port'          => ( $port > 0 && $port <= 65535 ) ? $port : (int) $current['smtp_port'],
+			'smtp_encryption'    => in_array( $encryption, $encryptions, true ) ? $encryption : 'tls',
+			'smtp_username'      => isset( $input['smtp_username'] ) ? sanitize_text_field( $input['smtp_username'] ) : '',
+			'log_enabled'        => ! empty( $input['log_enabled'] ),
+			'log_retention_days' => isset( $input['log_retention_days'] ) ? min( 3650, absint( $input['log_retention_days'] ) ) : 30,
+			'log_max_rows'       => isset( $input['log_max_rows'] ) ? min( 1000000, absint( $input['log_max_rows'] ) ) : 5000,
 		);
 	}
 
@@ -243,13 +247,52 @@ final class SettingsPage {
 					</tr>
 				</table>
 
+				<h2><?php echo esc_html__( 'Log', 'mail-vitals' ); ?></h2>
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row"><?php echo esc_html__( 'Record sends', 'mail-vitals' ); ?></th>
+						<td>
+							<label>
+								<input type="checkbox" value="1"
+									name="<?php echo esc_attr( Settings::OPTION ); ?>[log_enabled]"
+									<?php checked( ! empty( $settings['log_enabled'] ) ); ?>>
+								<?php echo esc_html__( 'Keep a record of every message this site sends', 'mail-vitals' ); ?>
+							</label>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="mail-vitals-retention"><?php echo esc_html__( 'Keep for', 'mail-vitals' ); ?></label>
+						</th>
+						<td>
+							<input type="number" min="0" max="3650" class="small-text" id="mail-vitals-retention"
+								name="<?php echo esc_attr( Settings::OPTION ); ?>[log_retention_days]"
+								value="<?php echo esc_attr( (string) $settings['log_retention_days'] ); ?>">
+							<?php echo esc_html__( 'days', 'mail-vitals' ); ?>
+							<p class="description"><?php echo esc_html__( 'Zero keeps entries regardless of age.', 'mail-vitals' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="mail-vitals-max-rows"><?php echo esc_html__( 'At most', 'mail-vitals' ); ?></label>
+						</th>
+						<td>
+							<input type="number" min="0" max="1000000" class="small-text" id="mail-vitals-max-rows"
+								name="<?php echo esc_attr( Settings::OPTION ); ?>[log_max_rows]"
+								value="<?php echo esc_attr( (string) $settings['log_max_rows'] ); ?>">
+							<?php echo esc_html__( 'entries', 'mail-vitals' ); ?>
+							<p class="description"><?php echo esc_html__( 'Both limits apply. Age alone would let a busy site store millions of entries; size alone would let a quiet one keep entries from years ago.', 'mail-vitals' ); ?></p>
+						</td>
+					</tr>
+				</table>
+
 				<?php submit_button(); ?>
 			</form>
 
 			<?php self::render_secrets(); ?>
 			<?php self::render_test_form(); ?>
 			<?php self::render_diagnostics(); ?>
-			<?php self::render_failures(); ?>
+			<?php self::render_log(); ?>
 		</div>
 		<?php
 	}
@@ -420,37 +463,62 @@ final class SettingsPage {
 	}
 
 	/**
-	 * Show what has recently failed, and why.
+	 * Show the most recent entries in the send log.
 	 *
 	 * @return void
 	 */
-	private static function render_failures() {
-		$failures = FailureRecorder::recent();
+	private static function render_log() {
+		$entries = Store::page( array( 'limit' => 25 ) );
+		$total   = Store::count();
+		$failed  = Store::count( Store::STATUS_FAILED );
 		?>
-		<h2><?php echo esc_html__( 'Recent failures', 'mail-vitals' ); ?></h2>
-		<?php if ( empty( $failures ) ) : ?>
-			<p><?php echo esc_html__( 'Nothing has failed since records began.', 'mail-vitals' ); ?></p>
+		<h2><?php echo esc_html__( 'Send log', 'mail-vitals' ); ?></h2>
+		<p class="description">
+			<?php
+			printf(
+				/* translators: 1: total number of logged messages, 2: number that failed. */
+				esc_html__( '%1$d messages logged, %2$d of them refused. Message bodies are not kept: what is recorded is the envelope and the reason a message was refused, verbatim.', 'mail-vitals' ),
+				(int) $total,
+				(int) $failed
+			);
+			?>
+		</p>
+		<?php if ( empty( $entries ) ) : ?>
+			<p><?php echo esc_html__( 'Nothing has been sent since the log was started.', 'mail-vitals' ); ?></p>
 			<?php return; ?>
 		<?php endif; ?>
-		<p class="description">
-			<?php echo esc_html__( 'Message bodies are not kept. What is recorded is the envelope and the reason the message was refused, verbatim.', 'mail-vitals' ); ?>
-		</p>
 		<table class="widefat striped">
 			<thead>
 				<tr>
 					<th><?php echo esc_html__( 'When', 'mail-vitals' ); ?></th>
+					<th><?php echo esc_html__( 'Result', 'mail-vitals' ); ?></th>
+					<th><?php echo esc_html__( 'Via', 'mail-vitals' ); ?></th>
 					<th><?php echo esc_html__( 'To', 'mail-vitals' ); ?></th>
 					<th><?php echo esc_html__( 'Subject', 'mail-vitals' ); ?></th>
 					<th><?php echo esc_html__( 'Reason', 'mail-vitals' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
-			<?php foreach ( $failures as $failure ) : ?>
+			<?php foreach ( $entries as $entry ) : ?>
 				<tr>
-					<td><?php echo esc_html( wp_date( 'Y-m-d H:i', (int) $failure['time'] ) ); ?></td>
-					<td><?php echo esc_html( $failure['to'] ); ?></td>
-					<td><?php echo esc_html( $failure['subject'] ); ?></td>
-					<td><code><?php echo esc_html( $failure['reason'] ); ?></code></td>
+					<td><?php echo esc_html( get_date_from_gmt( $entry['sent_at'], 'Y-m-d H:i' ) ); ?></td>
+					<td>
+						<?php
+						echo Store::STATUS_SENT === $entry['status']
+							? esc_html__( 'Sent', 'mail-vitals' )
+							: '<strong>' . esc_html__( 'Refused', 'mail-vitals' ) . '</strong>';
+						?>
+					</td>
+					<td><?php echo esc_html( $entry['transport'] ); ?></td>
+					<td><?php echo esc_html( $entry['recipients'] ); ?></td>
+					<td><?php echo esc_html( $entry['subject'] ); ?></td>
+					<td>
+						<?php if ( '' !== $entry['error'] ) : ?>
+							<code><?php echo esc_html( $entry['error'] ); ?></code>
+						<?php else : ?>
+							&mdash;
+						<?php endif; ?>
+					</td>
 				</tr>
 			<?php endforeach; ?>
 			</tbody>
@@ -476,7 +544,7 @@ final class SettingsPage {
 		if ( 'failed' === $result ) {
 			printf(
 				'<div class="notice notice-error is-dismissible"><p>%s</p></div>',
-				esc_html__( 'The test message was refused. The reason is in Recent failures, below.', 'mail-vitals' )
+				esc_html__( 'The test message was refused. The reason is in the send log, below.', 'mail-vitals' )
 			);
 		}
 	}
