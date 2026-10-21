@@ -7,6 +7,8 @@
 
 namespace MailVitals;
 
+use MailVitals\Admin\SettingsPage;
+use MailVitals\Admin\TestSend;
 use MailVitals\Diagnostics\SiteHealth;
 use MailVitals\Mailer\Dispatcher;
 
@@ -32,5 +34,10 @@ final class Plugin {
 		Dispatcher::register();
 		SiteHealth::register();
 		Abilities::register();
+
+		if ( is_admin() ) {
+			SettingsPage::register();
+			TestSend::register();
+		}
 	}
 }
