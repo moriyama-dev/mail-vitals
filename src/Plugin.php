@@ -12,6 +12,7 @@ use MailVitals\Admin\TestSend;
 use MailVitals\Diagnostics\SiteHealth;
 use MailVitals\Log\Pruner;
 use MailVitals\Log\Schema;
+use MailVitals\Queue\Worker;
 use MailVitals\Mailer\Dispatcher;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -35,6 +36,7 @@ final class Plugin {
 	public static function boot() {
 		Schema::maybe_install();
 		Pruner::register();
+		Worker::register();
 
 		Dispatcher::register();
 		SiteHealth::register();

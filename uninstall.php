@@ -20,6 +20,7 @@ if ( ! defined( 'MAIL_VITALS_DIR' ) ) {
 
 \MailVitals\Autoloader::register();
 \MailVitals\Log\Pruner::unschedule();
+\MailVitals\Queue\Worker::unschedule();
 \MailVitals\Log\Schema::drop();
 
 delete_option( \MailVitals\Mailer\Settings::OPTION );

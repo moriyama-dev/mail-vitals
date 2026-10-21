@@ -7,6 +7,9 @@
 
 namespace MailVitals\Mailer;
 
+use MailVitals\Queue\Queue;
+use MailVitals\Queue\Worker;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -68,6 +71,17 @@ final class Failover {
 
 			if ( ! $sent ) {
 				$sent = self::attempt( $backup, $atts );
+			}
+
+			/*
+			 * Both routes refused it. That points at something broader than a
+			 * single refused connection, so the message is set aside to be
+			 * tried again later rather than retried hard against an outage.
+			 * A message already being retried is not queued again, or the
+			 * queue would fill with copies of itself.
+			 */
+			if ( ! $sent && ! Worker::is_retrying() ) {
+				Queue::push( $atts );
 			}
 		} finally {
 			self::$running = false;

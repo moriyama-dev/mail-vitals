@@ -53,9 +53,10 @@ final class SiteHealth {
 	 * @return array
 	 */
 	public static function run_test() {
-		$check    = DomainAuth::for_this_site();
-		$findings = $check->run();
-		$problems = array_filter(
+		$check      = DomainAuth::for_this_site();
+		$findings   = $check->run();
+		$findings[] = QueueHealth::check();
+		$problems   = array_filter(
 			$findings,
 			static function ( Finding $finding ) {
 				return $finding->is_problem();

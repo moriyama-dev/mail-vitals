@@ -33,7 +33,7 @@ final class Schema {
 	 *
 	 * @var int
 	 */
-	const VERSION = 1;
+	const VERSION = 2;
 
 	/**
 	 * Full name of the log table, including the site's prefix.
@@ -44,6 +44,17 @@ final class Schema {
 		global $wpdb;
 
 		return $wpdb->prefix . 'mail_vitals_log';
+	}
+
+	/**
+	 * Full name of the retry queue table, including the site's prefix.
+	 *
+	 * @return string
+	 */
+	public static function queue_table() {
+		global $wpdb;
+
+		return $wpdb->prefix . 'mail_vitals_queue';
 	}
 
 	/**
@@ -90,20 +101,41 @@ final class Schema {
 			KEY status_sent_at (status, sent_at)
 		) {$collate};";
 
+		$queue = self::queue_table();
+
+		/*
+		 * The queue is working storage, not a record. It holds the message
+		 * body because a retry cannot be attempted without it, and each row is
+		 * deleted the moment the message is delivered or abandoned. The log,
+		 * which is kept, has no column for a body at all.
+		 */
+		$queue_sql = "CREATE TABLE {$queue} (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			queued_at datetime NOT NULL,
+			next_attempt_at datetime NOT NULL,
+			attempts tinyint(3) unsigned NOT NULL DEFAULT 0,
+			subject text NOT NULL,
+			payload longtext NOT NULL,
+			PRIMARY KEY  (id),
+			KEY next_attempt_at (next_attempt_at)
+		) {$collate};";
+
 		dbDelta( $sql );
+		dbDelta( $queue_sql );
 
 		update_option( self::VERSION_OPTION, self::VERSION, false );
 	}
 
 	/**
-	 * Whether the table is actually present.
+	 * Whether a table is actually present.
 	 *
+	 * @param string $table Table to look for. Defaults to the log table.
 	 * @return bool
 	 */
-	public static function exists() {
+	public static function exists( $table = '' ) {
 		global $wpdb;
 
-		$table = self::table();
+		$table = '' !== $table ? $table : self::table();
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Checking for a table cannot be done through the options API, and must not be cached.
 		return $table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
@@ -122,8 +154,13 @@ final class Schema {
 
 		$table = self::table();
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Dropping the plugin's own table on uninstall has no API alternative.
+		$queue = self::queue_table();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Dropping the plugin's own tables on uninstall has no API alternative.
 		$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Dropping the plugin's own tables on uninstall has no API alternative.
+		$wpdb->query( "DROP TABLE IF EXISTS {$queue}" );
 
 		delete_option( self::VERSION_OPTION );
 	}

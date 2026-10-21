@@ -9,6 +9,7 @@ namespace MailVitals;
 
 use MailVitals\Log\Pruner;
 use MailVitals\Log\Schema;
+use MailVitals\Queue\Worker;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -43,6 +44,7 @@ final class Lifecycle {
 	public static function activate() {
 		Schema::install();
 		Pruner::schedule();
+		Worker::schedule();
 	}
 
 	/**
@@ -52,5 +54,6 @@ final class Lifecycle {
 	 */
 	public static function deactivate() {
 		Pruner::unschedule();
+		Worker::unschedule();
 	}
 }

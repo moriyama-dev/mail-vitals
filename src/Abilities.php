@@ -9,6 +9,7 @@ namespace MailVitals;
 
 use MailVitals\Diagnostics\DomainAuth;
 use MailVitals\Diagnostics\Finding;
+use MailVitals\Diagnostics\QueueHealth;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -82,9 +83,10 @@ final class Abilities {
 	 * @return array
 	 */
 	public static function delivery_health( $input = array() ) {
-		$fresh    = ! empty( $input['fresh'] );
-		$check    = DomainAuth::for_this_site();
-		$findings = $check->run( $fresh );
+		$fresh      = ! empty( $input['fresh'] );
+		$check      = DomainAuth::for_this_site();
+		$findings   = $check->run( $fresh );
+		$findings[] = QueueHealth::check();
 
 		$status = Finding::STATUS_GOOD;
 
