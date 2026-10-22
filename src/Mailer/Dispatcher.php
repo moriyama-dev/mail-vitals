@@ -58,8 +58,13 @@ final class Dispatcher {
 
 		if ( null !== $backup ) {
 			$backup->register();
-			Failover::register();
 		}
+
+		/*
+		 * Registered whether or not there is a backup: a message the only
+		 * route refused must still be kept for a retry.
+		 */
+		Delivery::register();
 	}
 
 	/**
