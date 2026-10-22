@@ -192,12 +192,13 @@ stays in the site's own log.
 
 <!--
 SCREENSHOT: docs/images/alerts-settings.png
-Settings → Mail Vitals, "Alerts" section: the channel table (Slack set) and the
-"Problems being reported" table with one open problem.
+Settings → Mail Vitals, "Alerts" section: the channel table (Slack or Webhook
+set) and the "Problems being reported" table with one open problem.
 -->
 
 <!--
 SCREENSHOT: docs/images/slack-alert.png
+Optional; leave this comment out if there is no Slack workspace to take it in.
 A Slack channel showing one "mail is failing on SMTP" notice and, below it,
 the "mail is getting through on SMTP again" notice for the same problem.
 -->
@@ -274,7 +275,7 @@ changes meaning or is removed; new fields can appear without it.
     "error": "SMTP Error: Could not authenticate.",
     "title": "Example Shop: mail is failing on SMTP",
     "text": "The mail server refused the login or API key.\n...",
-    "plugin_version": "0.1.0"
+    "plugin_version": "0.2.0"
 }
 ```
 
@@ -315,7 +316,9 @@ tables and options.
 
 ## Status
 
-In development, version 0.1.0. Not yet on WordPress.org.
+Version 0.2.0. Everything described above is in place and covered by the test
+suite. It is not on WordPress.org yet; install it from GitHub as described
+under Setup.
 
 ## Requirements
 

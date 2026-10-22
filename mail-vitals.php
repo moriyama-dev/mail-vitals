@@ -3,7 +3,7 @@
  * Plugin Name:       Mail Vitals
  * Plugin URI:        https://github.com/moriyama-dev/mail-vitals
  * Description:       Finds out why email leaving WordPress does not arrive, and keeps a record of what happened to every message the site sends.
- * Version:           0.1.0
+ * Version:           0.2.0
  * Requires at least: 6.9
  * Requires PHP:      7.4
  * Author:            Yoshiro Moriyama
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MAIL_VITALS_VERSION', '0.1.0' );
+define( 'MAIL_VITALS_VERSION', '0.2.0' );
 define( 'MAIL_VITALS_FILE', __FILE__ );
 define( 'MAIL_VITALS_DIR', plugin_dir_path( __FILE__ ) );
 
