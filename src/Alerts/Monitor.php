@@ -241,7 +241,7 @@ final class Monitor {
 			if ( ! $channel->accepts( $alert ) ) {
 				$reason = $channel->refusal_reason();
 
-				/* translators: 1: channel name, 2: reason. */
+				/* translators: 1: channel name, 2: error message. */
 				$errors[]                  = sprintf( __( '%1$s: %2$s', 'mail-vitals' ), $channel->label(), $reason );
 				$results[ $channel->id() ] = $reason;
 				continue;

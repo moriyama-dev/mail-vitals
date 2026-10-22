@@ -1,0 +1,1092 @@
+# Copyright (C) 2026 Yoshiro Moriyama
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Mail Vitals 0.2.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mail-vitals\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-10-22T19:50:43+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: mail-vitals\n"
+
+#. Plugin Name of the plugin
+#: mail-vitals.php
+#: src/Admin/SettingsPage.php:76
+#: src/Admin/SettingsPage.php:77
+#: src/Admin/SettingsPage.php:154
+msgid "Mail Vitals"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: mail-vitals.php
+msgid "https://github.com/moriyama-dev/mail-vitals"
+msgstr ""
+
+#. Description of the plugin
+#: mail-vitals.php
+msgid "Finds out why email leaving WordPress does not arrive, and keeps a record of what happened to every message the site sends."
+msgstr ""
+
+#. Author of the plugin
+#: mail-vitals.php
+msgid "Yoshiro Moriyama"
+msgstr ""
+
+#. Author URI of the plugin
+#: mail-vitals.php
+msgid "https://github.com/moriyama-dev"
+msgstr ""
+
+#: src/Abilities.php:46
+msgid "Mail delivery health"
+msgstr ""
+
+#: src/Abilities.php:47
+msgid "Reports whether this site's sending domain is set up so that the mail it sends will be accepted, and whether other code is taking part in sending it, and whether the server and the configured routes can send."
+msgstr ""
+
+#: src/Abilities.php:56
+msgid "Query DNS again instead of reusing the cached result."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:162
+msgid "How mail is sent"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:165
+msgid "Transport"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:172
+msgid "Who mail comes from"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:176
+msgid "From address"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:183
+msgid "Leave empty to let WordPress derive one from the site address. A derived address on a host name without a dot, such as \"localhost\", is rejected before anything is sent."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:189
+msgid "From name"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:198
+msgid "Override"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:204
+msgid "Use these details even when a plugin asks to send as something else"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:210
+msgid "Alert email"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:214
+msgid "Send alerts to"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:221
+msgid "Addresses to email when mail starts failing, separated by commas. Leave empty for no email alerts. An address is not a secret, so unlike the webhook URLs it is set here rather than in wp-config.php."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:224
+msgid "Email alerts are only sent over a route other than the one that is failing, so they need both an SMTP server and Brevo set up. With a single route, use Slack or a webhook to hear about its failures."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:230
+#: src/Admin/SettingsPage.php:341
+#: src/Diagnostics/MailSetup.php:282
+msgid "SMTP server"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:234
+msgid "Host"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:244
+msgid "Port"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:254
+msgid "Encryption"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:268
+msgid "Username"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:278
+msgid "Log"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:281
+msgid "Record sends"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:287
+msgid "Keep a record of every message this site sends"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:293
+msgid "Keep for"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:299
+msgid "days"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:300
+msgid "Zero keeps entries regardless of age."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:305
+msgid "At most"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:311
+msgid "entries"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:312
+msgid "Both limits apply. Age alone would let a busy site store millions of entries; size alone would let a quiet one keep entries from years ago."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:340
+msgid "Leave it to WordPress"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:342
+#: src/Diagnostics/MailSetup.php:303
+msgid "Brevo API"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:363
+msgid "TLS (usually port 587)"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:364
+msgid "SSL (usually port 465)"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:365
+msgid "None"
+msgstr ""
+
+#. translators: %s: name of the transport in use.
+#: src/Admin/SettingsPage.php:391
+#, php-format
+msgid "Mail is being sent through: %s"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:402
+msgid "The selected transport is not fully configured, so WordPress is still sending mail its own way. Nothing here is taking effect yet."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:418
+msgid "Credentials"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:420
+msgid "Passwords and API keys are read from wp-config.php and are never written to the database. There is no field for them here because there is no code to store one."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:430
+#: src/Admin/SettingsPage.php:508
+msgid "Set"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:431
+#: src/Admin/SettingsPage.php:509
+msgid "Not set"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:439
+msgid "To set one, add a line such as the following to wp-config.php:"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:454
+msgid "Send a test message"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:459
+msgid "Send to"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:463
+msgid "Send test message"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:482
+msgid "Alerts"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:484
+msgid "When mail starts failing, a notice goes to each channel below: at once, then after 15 minutes, 1 hour and 6 hours, then once a day while the problem lasts, and once more when it is over. Failures for the same reason on the same route count as one problem. Notices carry no recipient or subject, and email addresses in error text are masked."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:489
+msgid "Channel"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:490
+msgid "Constant in wp-config.php"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:491
+msgid "Status"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:502
+msgid "None. Set under \"Alert email\" above."
+msgstr ""
+
+#. translators: 1: date and time, 2: error message.
+#: src/Admin/SettingsPage.php:517
+#, php-format
+msgid "Last attempt failed (%1$s): %2$s"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:531
+msgid "A webhook can be signed: set MAIL_VITALS_WEBHOOK_SECRET and the body is sent with an HMAC-SHA256 signature in the X-Mail-Vitals-Signature header."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:536
+msgid "Problems being reported"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:538
+msgid "None."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:543
+msgid "Route"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:544
+msgid "Problem"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:545
+msgid "Since"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:546
+msgid "Failures"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:547
+msgid "Notices sent"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:557
+msgid "Mail is still getting through over the other route."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:575
+msgid "Send a test alert"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:594
+#: src/Diagnostics/QueueHealth.php:45
+msgid "Retry queue"
+msgstr ""
+
+#. translators: %d: number of attempts before a message is given up on.
+#: src/Admin/SettingsPage.php:609
+#, php-format
+msgid "Each message is tried again after 5 minutes, 30 minutes, 2 hours and 6 hours, then given up on after %d attempts. Message bodies are kept only while a message waits here, and are not shown."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:617
+msgid "Queued"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:618
+msgid "Retries made"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:619
+msgid "Next attempt"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:620
+#: src/Admin/SettingsPage.php:853
+msgid "To"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:621
+#: src/Admin/SettingsPage.php:854
+msgid "Subject"
+msgstr ""
+
+#. translators: 1: retries made so far, 2: the most there will be.
+#: src/Admin/SettingsPage.php:631
+#, php-format
+msgid "%1$d of %2$d"
+msgstr ""
+
+#. translators: %s: human-readable duration, such as "25 mins".
+#: src/Admin/SettingsPage.php:638
+#, php-format
+msgid "In %s"
+msgstr ""
+
+#. translators: %s: human-readable duration, such as "3 hours".
+#: src/Admin/SettingsPage.php:641
+#, php-format
+msgid "Due %s ago, waiting for scheduled events to run"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:649
+msgid "Unreadable. It will be given up on, with the reason in the send log."
+msgstr ""
+
+#. translators: 1: number shown, 2: number waiting in all.
+#: src/Admin/SettingsPage.php:662
+#, php-format
+msgid "Showing the next %1$d of %2$d messages."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:680
+msgid "Domain authentication"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:684
+#: src/Admin/SettingsPage.php:717
+msgid "Check"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:685
+#: src/Admin/SettingsPage.php:718
+#: src/Admin/SettingsPage.php:851
+msgid "Result"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:686
+#: src/Admin/SettingsPage.php:719
+msgid "What it means"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:710
+msgid "Server and route setup"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:712
+msgid "Checked without sending anything: routes are connected to and then left, and results are kept for ten minutes."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:748
+msgid "Before Mail Vitals"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:749
+msgid "After Mail Vitals"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:766
+msgid "Hook"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:767
+msgid "Priority"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:768
+msgid "Runs"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:769
+msgid "Belongs to"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:770
+msgid "Callback"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:771
+msgid "File"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:786
+msgid "Could not be traced"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:794
+msgid "Checked as the hooks stand when this page loads. Code that attaches itself only while a message is being sent does not appear here."
+msgstr ""
+
+#. translators: %s: plugin name.
+#: src/Admin/SettingsPage.php:810
+#, php-format
+msgid "Plugin: %s"
+msgstr ""
+
+#. translators: %s: must-use plugin name.
+#: src/Admin/SettingsPage.php:813
+#, php-format
+msgid "Must-use plugin: %s"
+msgstr ""
+
+#. translators: %s: theme name.
+#: src/Admin/SettingsPage.php:816
+#, php-format
+msgid "Theme: %s"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:832
+msgid "Send log"
+msgstr ""
+
+#. translators: 1: total number of logged messages, 2: number that failed.
+#: src/Admin/SettingsPage.php:837
+#, php-format
+msgid "%1$d messages logged, %2$d of them refused. Message bodies are not kept: what is recorded is the envelope and the reason a message was refused, verbatim."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:844
+msgid "Nothing has been sent since the log was started."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:850
+msgid "When"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:852
+msgid "Via"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:855
+msgid "Reason"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:865
+msgid "Sent"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:866
+msgid "Refused"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:897
+msgid "The test message was accepted for delivery."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:904
+msgid "The test message was refused. The reason is in the send log, below."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:911
+msgid "The test alert was delivered."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:912
+msgid "The test alert could not be delivered. The reason is shown next to each channel under Alerts."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:913
+msgid "No alert channel is set up yet."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:934
+msgid "Good"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:936
+msgid "Worth fixing"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:938
+msgid "Blocking delivery"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:940
+msgid "Could not check"
+msgstr ""
+
+#: src/Admin/TestAlert.php:48
+msgid "You are not allowed to send test alerts from this site."
+msgstr ""
+
+#: src/Admin/TestSend.php:46
+msgid "You are not allowed to send test messages from this site."
+msgstr ""
+
+#: src/Admin/TestSend.php:59
+msgid "Mail Vitals test message"
+msgstr ""
+
+#. translators: %s: the site's name.
+#: src/Admin/TestSend.php:62
+#, php-format
+msgid "This message was sent from %s to confirm that its mail configuration works. Nothing else needs to be done with it."
+msgstr ""
+
+#. translators: %s: site name.
+#: src/Alerts/Alert.php:222
+#, php-format
+msgid "%s: a message was given up on after every retry"
+msgstr ""
+
+#. translators: 1: site name, 2: name of the mail route.
+#: src/Alerts/Alert.php:225
+#, php-format
+msgid "%1$s: mail is failing on %2$s"
+msgstr ""
+
+#. translators: %s: site name.
+#: src/Alerts/Alert.php:230
+#, php-format
+msgid "%s: more messages were given up on after every retry"
+msgstr ""
+
+#. translators: 1: site name, 2: name of the mail route.
+#: src/Alerts/Alert.php:233
+#, php-format
+msgid "%1$s: mail is still failing on %2$s"
+msgstr ""
+
+#. translators: %s: site name.
+#: src/Alerts/Alert.php:238
+#, php-format
+msgid "%s: mail is being delivered again"
+msgstr ""
+
+#. translators: 1: site name, 2: name of the mail route.
+#: src/Alerts/Alert.php:241
+#, php-format
+msgid "%1$s: mail is getting through on %2$s again"
+msgstr ""
+
+#. translators: %s: site name.
+#: src/Alerts/Alert.php:245
+#, php-format
+msgid "%s: test alert from Mail Vitals"
+msgstr ""
+
+#: src/Alerts/Alert.php:256
+msgid "Alerts from this site reach this channel. Nothing needs to be done."
+msgstr ""
+
+#. translators: 1: how long the problem lasted, 2: number of failures.
+#: src/Alerts/Alert.php:263
+#, php-format
+msgid "The problem lasted %1$s and %2$d send failed."
+msgid_plural "The problem lasted %1$s and %2$d sends failed."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Alerts/Alert.php:273
+msgid "These messages were not delivered and will not be retried again."
+msgstr ""
+
+#: src/Alerts/Alert.php:277
+msgid "Messages are still reaching their recipients over the other route, but the site has lost its backup."
+msgstr ""
+
+#: src/Alerts/Alert.php:278
+msgid "Messages are not being delivered. Failed messages are kept and retried where a route is configured."
+msgstr ""
+
+#. translators: 1: failures since the last notice, 2: failures in total, 3: date and time the problem began.
+#: src/Alerts/Alert.php:284
+#, php-format
+msgid "%1$d more since the last notice, %2$d in total since %3$s."
+msgstr ""
+
+#. translators: %s: date and time the problem began.
+#: src/Alerts/Alert.php:291
+#, php-format
+msgid "First seen %s."
+msgstr ""
+
+#. translators: %s: error text, with email addresses masked.
+#: src/Alerts/Alert.php:297
+#, php-format
+msgid "Latest error: %s"
+msgstr ""
+
+#: src/Alerts/Alert.php:300
+msgid "The full error is in the send log under Settings → Mail Vitals."
+msgstr ""
+
+#: src/Alerts/Alert.php:314
+msgid "SMTP"
+msgstr ""
+
+#: src/Alerts/Alert.php:316
+msgid "the Brevo API"
+msgstr ""
+
+#: src/Alerts/Alert.php:318
+msgid "the retry queue"
+msgstr ""
+
+#: src/Alerts/Alert.php:320
+msgid "WordPress's own mail function"
+msgstr ""
+
+#: src/Alerts/Alert.php:333
+msgid "The mail server could not be reached."
+msgstr ""
+
+#: src/Alerts/Alert.php:335
+msgid "The mail server refused the login or API key."
+msgstr ""
+
+#: src/Alerts/Alert.php:337
+msgid "The From address was refused."
+msgstr ""
+
+#: src/Alerts/Alert.php:339
+msgid "A recipient was refused."
+msgstr ""
+
+#: src/Alerts/Alert.php:341
+msgid "The mail provider is limiting how much the site may send."
+msgstr ""
+
+#: src/Alerts/Alert.php:343
+msgid "The mail provider reported a problem on its side."
+msgstr ""
+
+#: src/Alerts/Alert.php:345
+msgid "A message was given up on after every retry."
+msgstr ""
+
+#: src/Alerts/Alert.php:347
+msgid "The send failed for a reason Mail Vitals does not recognise."
+msgstr ""
+
+#: src/Alerts/EmailNotifier.php:52
+#: src/Diagnostics/SiteHealth.php:85
+#: src/Diagnostics/SiteHealth.php:141
+#: src/Diagnostics/SiteHealth.php:174
+msgid "Email"
+msgstr ""
+
+#. translators: %s: name of the mail route, such as "SMTP".
+#: src/Alerts/EmailNotifier.php:112
+#, php-format
+msgid "The alert email was refused by %s. The reason is in the send log."
+msgstr ""
+
+#: src/Alerts/EmailNotifier.php:127
+msgid "Email alerts are only sent over a route other than the one that is failing, and no other route is configured."
+msgstr ""
+
+#. translators: 1: HTTP status code, 2: start of the response body.
+#: src/Alerts/Http.php:85
+#, php-format
+msgid "The channel answered HTTP %1$d: %2$s"
+msgstr ""
+
+#. translators: 1: channel name, 2: error message.
+#: src/Alerts/Monitor.php:245
+#: src/Alerts/Monitor.php:262
+#, php-format
+msgid "%1$s: %2$s"
+msgstr ""
+
+#: src/Alerts/SlackNotifier.php:39
+msgid "Slack"
+msgstr ""
+
+#: src/Alerts/WebhookNotifier.php:55
+msgid "Webhook"
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:191
+msgid "Sending domain"
+msgstr ""
+
+#. translators: %s: the IP address in the site's From address.
+#: src/Diagnostics/DomainAuth.php:200
+#, php-format
+msgid "Mail is sent from the IP address \"%s\" instead of a domain. SPF, DKIM and DMARC cannot be set up for an IP address, so most receiving servers reject mail from it. Set a real domain in the From address."
+msgstr ""
+
+#. translators: %s: the domain part of the site's From address.
+#: src/Diagnostics/DomainAuth.php:217
+#, php-format
+msgid "Mail is sent from \"%s\", which is not a usable domain. Messages are rejected before they leave the server, and no amount of mail configuration will change that. Set a real domain in the From address."
+msgstr ""
+
+#. translators: %s: the domain part of the site's From address.
+#: src/Diagnostics/DomainAuth.php:230
+#, php-format
+msgid "Mail is sent from the domain \"%s\"."
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:243
+msgid "SPF record"
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:257
+msgid "No SPF record was found. Receiving servers have no way to tell which machines may send for this domain, so mail from it is widely treated as suspicious."
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:267
+msgid "The SPF record ends in \"+all\", which authorises every server on the internet to send as this domain. That is the same as publishing no policy, and some providers treat it as worse."
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:288
+msgid "An SPF record exists but does not end in \"-all\" or \"~all\", so it never says what to do about servers it has not listed. Receivers are left to guess."
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:301
+msgid "An SPF record is published and delegates its policy to another domain with \"redirect=\"."
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:313
+msgid "An SPF record is published and states a policy for unlisted servers."
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:327
+msgid "DKIM key"
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:347
+msgid "This domain returns a DKIM record for every selector asked for, including one invented at random, so nothing can be concluded about which keys actually exist. A wildcard DNS record is the usual cause."
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:371
+msgid "No DKIM key was found at any of the selectors the common mail providers use. DNS cannot be asked to list selectors, so a key published under a name of your own would not be seen here. Without DKIM, nothing cryptographically ties a message to this domain."
+msgstr ""
+
+#. translators: %s: comma-separated list of DKIM selector names.
+#: src/Diagnostics/DomainAuth.php:385
+#, php-format
+msgid "A DKIM key is published at the selector \"%s\"."
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:416
+msgid "DMARC policy"
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:430
+msgid "No DMARC policy was found. Gmail and Yahoo now require one from anyone sending them bulk mail, and without it SPF and DKIM failures carry no stated consequence."
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:440
+msgid "A DMARC policy is published but set to \"p=none\", which only asks for reports and tells receivers to take no action. That is a reasonable place to start and a poor place to stay."
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:452
+msgid "A DMARC policy is published and asks receivers to act on failures."
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:473
+msgid "Skipped, because the site has no usable sending domain to look up."
+msgstr ""
+
+#: src/Diagnostics/DomainAuth.php:483
+msgid "This server does not allow PHP to look up DNS records, so the check could not run. This is not the same as the record being missing."
+msgstr ""
+
+#. translators: 1: name of the plugin, theme or code, 2: file path.
+#: src/Diagnostics/MailInterference.php:138
+#, php-format
+msgid "wp_mail() is defined by %1$s (%2$s) instead of WordPress."
+msgstr ""
+
+#: src/Diagnostics/MailInterference.php:144
+msgid "A replacement does not have to run pre_wp_mail or phpmailer_init, so the route chosen in Mail Vitals may never be used, and failures may never reach the send log."
+msgstr ""
+
+#: src/Diagnostics/MailInterference.php:145
+msgid "A replacement does not have to report what happened, so messages it sends or fails to send may be missing from the send log."
+msgstr ""
+
+#. translators: %s: name of the callback, such as __return_false.
+#: src/Diagnostics/MailInterference.php:156
+#, php-format
+msgid "A callback that always stops sending, %s, is attached to pre_wp_mail, so no mail leaves this site. This is a common way to switch mail off on a staging site. If that was intended, nothing needs to change; if it was not, this is why mail is not being sent."
+msgstr ""
+
+#. translators: %d: priority Mail Vitals takes over sending at.
+#: src/Diagnostics/MailInterference.php:165
+#, php-format
+msgid "Other code is attached to pre_wp_mail. A callback there that returns anything other than null decides what wp_mail() returns: at a priority below %d it stops the message before Mail Vitals sees it, and otherwise it also runs inside each of Mail Vitals' own attempts, where it can take the message over in place of the route."
+msgstr ""
+
+#: src/Diagnostics/MailInterference.php:168
+msgid "Other code is attached to pre_wp_mail. When a callback there returns anything other than null, wp_mail() stops and returns that value without reporting success or failure, so those messages do not appear in the send log."
+msgstr ""
+
+#. translators: %d: priority Mail Vitals configures SMTP at.
+#: src/Diagnostics/MailInterference.php:175
+#, php-format
+msgid "Other code is attached to phpmailer_init. A callback that runs after Mail Vitals' (priority %d) can overwrite the SMTP server, port and login it set, so mail leaves through a server other than the one configured here."
+msgstr ""
+
+#: src/Diagnostics/MailInterference.php:178
+msgid "Other code configures the mailer through phpmailer_init. Mail Vitals is leaving sending to WordPress, so this is not a conflict; it is listed so you know what is shaping outgoing mail."
+msgstr ""
+
+#: src/Diagnostics/MailInterference.php:182
+msgid "No other code is attached to the hooks that send mail, and wp_mail() is WordPress's own."
+msgstr ""
+
+#: src/Diagnostics/MailInterference.php:187
+#: src/Diagnostics/SiteHealth.php:58
+msgid "Other code handling mail"
+msgstr ""
+
+#: src/Diagnostics/MailInterference.php:477
+msgid "Unrecognised callback"
+msgstr ""
+
+#: src/Diagnostics/MailInterference.php:496
+msgid "Unidentified code"
+msgstr ""
+
+#: src/Diagnostics/MailInterference.php:528
+msgid "A WordPress function, attached by code that cannot be identified from the callback"
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:111
+msgid "PHP mail()"
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:122
+msgid "This server has switched PHP's mail() off (disable_functions)."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:124
+msgid "On Windows, PHP's mail() sends through the SMTP server set in php.ini, which this check does not look at."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:129
+msgid "PHP's sendmail_path is empty, so mail() has nothing to hand messages to."
+msgstr ""
+
+#. translators: %s: path of the mail program PHP hands messages to.
+#: src/Diagnostics/MailSetup.php:144
+#, php-format
+msgid "PHP hands mail to \"%s\", but open_basedir keeps this check from seeing whether it exists."
+msgstr ""
+
+#. translators: %s: path of the mail program PHP hands messages to.
+#: src/Diagnostics/MailSetup.php:153
+#, php-format
+msgid "PHP hands mail to \"%s\", which does not exist on this server."
+msgstr ""
+
+#. translators: %s: path of the mail program PHP hands messages to.
+#: src/Diagnostics/MailSetup.php:167
+#, php-format
+msgid "PHP hands mail to \"%s\", which exists. Whether it delivers cannot be told without sending a message."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:178
+msgid "It would matter if the route were removed."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:187
+msgid "WordPress is sending with mail(), so every message fails. Set up an SMTP server or Brevo on this screen, or ask the host to make mail() work."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:206
+msgid "The SMTP server is selected, but its host or port is not filled in, so it is not used."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:207
+msgid "Brevo is selected, but MAIL_VITALS_BREVO_API_KEY is not set in wp-config.php, so it is not used."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:211
+msgid "Selected route"
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:213
+msgid "WordPress is sending on its own with PHP's mail() instead."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:233
+msgid "A username is set but MAIL_VITALS_SMTP_PASSWORD is not, so Mail Vitals connects without logging in, and most servers refuse mail sent that way."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:236
+msgid "MAIL_VITALS_SMTP_PASSWORD is set but no username is, so the password is not used and the connection is made without logging in."
+msgstr ""
+
+#. translators: 1: host and port, 2: the server's greeting.
+#: src/Diagnostics/MailSetup.php:243
+#, php-format
+msgid "%1$s answered as a mail server (\"%2$s\"). Logging in is not tried, so a wrong password would only show when sending."
+msgstr ""
+
+#. translators: %s: host and port.
+#: src/Diagnostics/MailSetup.php:254
+#, php-format
+msgid "%s accepted the connection but said nothing. Port 465 expects an encrypted connection from the start; choose SSL as the encryption."
+msgstr ""
+
+#. translators: 1: host and port, 2: what it sent instead of a mail server's greeting.
+#: src/Diagnostics/MailSetup.php:259
+#, php-format
+msgid "%1$s accepted the connection but did not answer as a mail server (\"%2$s\")."
+msgstr ""
+
+#. translators: 1: host and port, 2: error message.
+#: src/Diagnostics/MailSetup.php:269
+#, php-format
+msgid "Could not connect to %1$s: %2$s. A mistyped host, or a hosting provider that blocks outgoing mail ports, are the usual causes."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:282
+msgid "SMTP server (backup)"
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:303
+msgid "Brevo API (backup)"
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:310
+msgid "MAIL_VITALS_BREVO_API_KEY holds a Brevo SMTP key (it starts with \"xsmtpsib-\"). The API needs an API key, which Brevo issues separately and which starts with \"xkeysib-\"."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:318
+msgid "Brevo accepted the key. Nothing was sent to check this."
+msgstr ""
+
+#. translators: %s: Brevo's answer.
+#: src/Diagnostics/MailSetup.php:321
+#, php-format
+msgid "Brevo refused the key (%s). It may have been deleted or mistyped, or Brevo may only accept it from listed IP addresses."
+msgstr ""
+
+#. translators: %s: error message.
+#: src/Diagnostics/MailSetup.php:324
+#, php-format
+msgid "Could not reach Brevo to check the key: %s"
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:343
+msgid "Sending is set to \"Leave it to WordPress\"."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:347
+msgid "MAIL_VITALS_BREVO_API_KEY is set in wp-config.php, but Brevo is not used."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:352
+msgid "MAIL_VITALS_SMTP_PASSWORD is set in wp-config.php, but no SMTP host is filled in, so the SMTP server is not used."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:353
+msgid "An SMTP server is filled in, but it is not used."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:364
+msgid "If mail was meant to go that way, it is not."
+msgstr ""
+
+#: src/Diagnostics/MailSetup.php:368
+msgid "Settings not in use"
+msgstr ""
+
+#. translators: %s: name of the route, such as "SMTP".
+#: src/Diagnostics/MailSetup.php:430
+#, php-format
+msgid "Not in use: mail goes through %s."
+msgstr ""
+
+#: src/Diagnostics/Probe.php:167
+msgid "This server does not allow PHP to open network connections, so the check could not run."
+msgstr ""
+
+#: src/Diagnostics/QueueHealth.php:53
+msgid "No messages are waiting to be retried."
+msgstr ""
+
+#. translators: 1: number of messages waiting, 2: human-readable duration.
+#: src/Diagnostics/QueueHealth.php:68
+#, php-format
+msgid "%1$d messages are waiting to be retried, and the oldest has been due for %2$s. Scheduled events are not running, so nothing is going to send them. This usually means WP-Cron was switched off and nothing was set up in its place."
+msgstr ""
+
+#. translators: %d: number of messages waiting.
+#: src/Diagnostics/QueueHealth.php:87
+#, php-format
+msgid "%d messages failed on every route and are waiting to be retried. They are moving; this is a sign the mail provider is having trouble, not that the queue is stuck."
+msgstr ""
+
+#: src/Diagnostics/SiteHealth.php:46
+msgid "Mail authentication"
+msgstr ""
+
+#: src/Diagnostics/SiteHealth.php:52
+msgid "Mail setup"
+msgstr ""
+
+#: src/Diagnostics/SiteHealth.php:82
+msgid "Mail from this site is properly authenticated"
+msgstr ""
+
+#: src/Diagnostics/SiteHealth.php:106
+msgid "Mail authentication for this site could be stronger"
+msgstr ""
+
+#: src/Diagnostics/SiteHealth.php:107
+msgid "Mail from this site is likely to be rejected"
+msgstr ""
+
+#: src/Diagnostics/SiteHealth.php:128
+msgid "Mail cannot leave this site as it is set up"
+msgstr ""
+
+#: src/Diagnostics/SiteHealth.php:131
+msgid "The mail setup has something worth fixing"
+msgstr ""
+
+#: src/Diagnostics/SiteHealth.php:134
+msgid "The mail setup can send"
+msgstr ""
+
+#: src/Diagnostics/SiteHealth.php:163
+msgid "No other code is getting in the way of sending mail"
+msgstr ""
+
+#: src/Diagnostics/SiteHealth.php:164
+msgid "Other code is taking part in sending mail"
+msgstr ""
+
+#: src/Diagnostics/SiteHealth.php:165
+msgid "wp_mail() is replaced, so the route set in Mail Vitals may never be used"
+msgstr ""
+
+#. translators: %d: hook priority.
+#: src/Diagnostics/SiteHealth.php:203
+#, php-format
+msgid "at priority %d"
+msgstr ""
+
+#. translators: 1: HTTP status code, 2: verbatim response from the mail provider.
+#: src/Mailer/BrevoTransport.php:182
+#, php-format
+msgid "Brevo refused the message (HTTP %1$d): %2$s"
+msgstr ""
+
+#: src/Queue/Worker.php:69
+msgid "Every five minutes (Mail Vitals)"
+msgstr ""
+
+#: src/Queue/Worker.php:142
+msgid "Could not be sent because its saved contents could no longer be read. The message was not delivered."
+msgstr ""
+
+#. translators: %d: number of attempts made.
+#: src/Queue/Worker.php:177
+#, php-format
+msgid "Given up on after %d attempts over every configured route. The message was not delivered."
+msgstr ""
