@@ -106,7 +106,7 @@ final class NotifierTest extends \WP_UnitTestCase {
 			Channels::configured()
 		);
 
-		$this->assertSame( array( 'slack', 'webhook', 'email' ), $ids );
+		$this->assertSame( array( 'slack', 'webhook' ), $ids, 'Email is off until an address is set.' );
 	}
 
 	/**

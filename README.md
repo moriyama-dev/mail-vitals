@@ -149,17 +149,20 @@ and requires the `view_site_health_checks` capability.
 
 ## Setup
 
-1. Install and activate the plugin.
+1. Install and activate the plugin. It is not on WordPress.org yet, so either
+   download the repository as a ZIP from GitHub and upload it under
+   **Plugins → Add New → Upload Plugin**, or clone it into the plugins folder:
+   `git clone https://github.com/moriyama-dev/mail-vitals.git wp-content/plugins/mail-vitals`
 2. Go to **Settings → Mail Vitals**.
 3. Choose how mail is sent and fill in the SMTP server details, if you use one.
-4. Add any passwords, keys and webhook URLs to `wp-config.php` (below).
+4. Add any passwords, keys and webhook URLs to `wp-config.php` (below). Alert
+   email addresses are entered on the settings screen.
 5. Send a test message from the same screen, and a test alert if you set up a
    channel.
 
 ## Credentials live in wp-config.php
 
-Passwords, API keys, webhook URLs and the alert address are read from
-constants only. There is no
+Passwords, API keys and webhook URLs are read from constants only. There is no
 field for them in the settings screen because there is no code that stores one
 in the database. The screen shows whether each one is set, never its value.
 
@@ -178,13 +181,11 @@ define( 'MAIL_VITALS_WEBHOOK_URL', 'https://example.com/hooks/mail' );
 
 // Optional. When set, webhook bodies are signed.
 define( 'MAIL_VITALS_WEBHOOK_SECRET', '...' );
-
-// Where email alerts go. Several addresses can be separated by commas.
-define( 'MAIL_VITALS_ALERT_EMAIL', 'ops@example.com' );
 ```
 
 A webhook URL is itself a credential: anyone who has it can post to the
-channel.
+channel. The addresses email alerts go to are not secret, so they are an
+ordinary setting on the settings screen instead.
 
 ## Webhook format
 
@@ -223,11 +224,12 @@ changes meaning or is removed; new fields can appear without it.
 
 The event is also sent in the `X-Mail-Vitals-Event` header. With a secret set,
 `X-Mail-Vitals-Signature` carries `sha256=` followed by the HMAC-SHA256 of the
-raw body. Check it against the body exactly as received:
+raw body. On the receiving side, with the same secret stored there (here in an
+environment variable), check it against the body exactly as received:
 
 ```php
 $body      = file_get_contents( 'php://input' );
-$expected  = 'sha256=' . hash_hmac( 'sha256', $body, getenv( 'MAIL_VITALS_WEBHOOK_SECRET' ) );
+$expected  = 'sha256=' . hash_hmac( 'sha256', $body, getenv( 'MY_WEBHOOK_SECRET' ) );
 $signature = isset( $_SERVER['HTTP_X_MAIL_VITALS_SIGNATURE'] ) ? $_SERVER['HTTP_X_MAIL_VITALS_SIGNATURE'] : '';
 
 if ( ! hash_equals( $expected, $signature ) ) {

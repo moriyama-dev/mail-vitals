@@ -71,6 +71,7 @@ final class Settings {
 				'log_enabled'        => true,
 				'log_retention_days' => 30,
 				'log_max_rows'       => 5000,
+				'alert_email'        => '',
 			)
 		);
 	}
@@ -160,6 +161,33 @@ final class Settings {
 		$settings = self::all();
 
 		return is_email( $settings['from_address'] ) ? (string) $settings['from_address'] : '';
+	}
+
+	/**
+	 * Addresses to email alerts to.
+	 *
+	 * Checked again on the way out, so a value written to the option by
+	 * other means than the settings screen cannot hand wp_mail() garbage.
+	 *
+	 * @return string[]
+	 */
+	public static function alert_emails() {
+		$settings = self::all();
+
+		return self::email_list( (string) $settings['alert_email'] );
+	}
+
+	/**
+	 * Valid, distinct addresses from a comma-separated list. Anything that is
+	 * not an address is dropped rather than corrected.
+	 *
+	 * @param string $addresses Addresses separated by commas.
+	 * @return string[]
+	 */
+	public static function email_list( $addresses ) {
+		$candidates = array_map( 'sanitize_email', array_map( 'trim', explode( ',', (string) $addresses ) ) );
+
+		return array_values( array_unique( array_filter( $candidates, 'is_email' ) ) );
 	}
 
 	/**

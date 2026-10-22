@@ -7,6 +7,7 @@
 
 namespace MailVitals\Tests\Alerts;
 
+use MailVitals\Admin\SettingsPage;
 use MailVitals\Alerts\Alert;
 use MailVitals\Alerts\CircuitBreaker;
 use MailVitals\Alerts\EmailNotifier;
@@ -116,6 +117,7 @@ final class EmailNotifierTest extends \WP_UnitTestCase {
 			array(
 				'transport'    => $transport,
 				'from_address' => 'site@example.com',
+				'alert_email'  => 'alerts@example.com, ops@example.com',
 				'smtp_host'    => $smtp ? 'smtp.example.test' : '',
 				'smtp_port'    => 587,
 			)
@@ -147,12 +149,36 @@ final class EmailNotifierTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Only valid addresses from the constant are used.
+	 * Saving keeps each valid address once and drops the rest.
 	 *
 	 * @return void
 	 */
-	public function test_recipients_skip_invalid_addresses() {
+	public function test_saving_keeps_only_valid_addresses() {
+		$saved = SettingsPage::sanitize( array( 'alert_email' => ' alerts@example.com,not an address, ops@example.com,,alerts@example.com ' ) );
+
+		$this->assertSame( 'alerts@example.com, ops@example.com', $saved['alert_email'] );
+	}
+
+	/**
+	 * A value stored by other means is checked again before use.
+	 *
+	 * @return void
+	 */
+	public function test_recipients_are_checked_on_the_way_out() {
+		update_option( Settings::OPTION, array( 'alert_email' => 'alerts@example.com, <script>, ops@example.com' ) );
+
 		$this->assertSame( array( 'alerts@example.com', 'ops@example.com' ), EmailNotifier::recipients() );
+	}
+
+	/**
+	 * Without an address, the channel is off.
+	 *
+	 * @return void
+	 */
+	public function test_no_address_means_no_email_channel() {
+		update_option( Settings::OPTION, array( 'transport' => Settings::TRANSPORT_SMTP ) );
+
+		$this->assertFalse( ( new EmailNotifier() )->is_configured() );
 	}
 
 	/**

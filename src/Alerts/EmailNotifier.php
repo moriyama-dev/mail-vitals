@@ -28,8 +28,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The same goes for a message the retry queue gave up on: every route had
  * just refused it, so none of them is known to work.
  *
- * The recipients are not a credential, but they are read from wp-config.php
- * like the other channels so that every channel is switched on the same way.
+ * The recipients are not a credential, so unlike the webhook URLs they are
+ * an ordinary setting: adding a person to the alerts should not mean editing
+ * wp-config.php.
  */
 final class EmailNotifier implements Notifier {
 
@@ -52,12 +53,12 @@ final class EmailNotifier implements Notifier {
 	}
 
 	/**
-	 * Constant that holds the recipients.
+	 * None: the recipients are set on the settings screen.
 	 *
 	 * @return string
 	 */
 	public function constant() {
-		return 'MAIL_VITALS_ALERT_EMAIL';
+		return '';
 	}
 
 	/**
@@ -154,14 +155,11 @@ final class EmailNotifier implements Notifier {
 	}
 
 	/**
-	 * Valid addresses from the constant, which may list several separated by
-	 * commas.
+	 * Addresses to send to.
 	 *
 	 * @return string[]
 	 */
 	public static function recipients() {
-		$addresses = array_map( 'trim', explode( ',', Settings::secret( 'alert_email' ) ) );
-
-		return array_values( array_filter( $addresses, 'is_email' ) );
+		return Settings::alert_emails();
 	}
 }

@@ -131,6 +131,7 @@ final class SettingsPage {
 			'log_enabled'        => ! empty( $input['log_enabled'] ),
 			'log_retention_days' => isset( $input['log_retention_days'] ) ? min( 3650, absint( $input['log_retention_days'] ) ) : 30,
 			'log_max_rows'       => isset( $input['log_max_rows'] ) ? min( 1000000, absint( $input['log_max_rows'] ) ) : 5000,
+			'alert_email'        => isset( $input['alert_email'] ) ? implode( ', ', Settings::email_list( sanitize_text_field( $input['alert_email'] ) ) ) : '',
 		);
 	}
 
@@ -200,6 +201,26 @@ final class SettingsPage {
 									<?php checked( ! empty( $settings['force_from'] ) ); ?>>
 								<?php echo esc_html__( 'Use these details even when a plugin asks to send as something else', 'mail-vitals' ); ?>
 							</label>
+						</td>
+					</tr>
+				</table>
+
+				<h2><?php echo esc_html__( 'Alert email', 'mail-vitals' ); ?></h2>
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row">
+							<label for="mail-vitals-alert-email"><?php echo esc_html__( 'Send alerts to', 'mail-vitals' ); ?></label>
+						</th>
+						<td>
+							<input type="email" multiple class="regular-text" id="mail-vitals-alert-email"
+								name="<?php echo esc_attr( Settings::OPTION ); ?>[alert_email]"
+								value="<?php echo esc_attr( $settings['alert_email'] ); ?>">
+							<p class="description">
+								<?php echo esc_html__( 'Addresses to email when mail starts failing, separated by commas. Leave empty for no email alerts. An address is not a secret, so unlike the webhook URLs it is set here rather than in wp-config.php.', 'mail-vitals' ); ?>
+							</p>
+							<p class="description">
+								<?php echo esc_html__( 'Email alerts are only sent over a route other than the one that is failing, so they need both an SMTP server and Brevo set up. With a single route, use Slack or a webhook to hear about its failures.', 'mail-vitals' ); ?>
+							</p>
 						</td>
 					</tr>
 				</table>
@@ -470,7 +491,13 @@ final class SettingsPage {
 			<?php foreach ( $channels as $channel ) : ?>
 				<tr>
 					<td><?php echo esc_html( $channel->label() ); ?></td>
-					<td><code><?php echo esc_html( $channel->constant() ); ?></code></td>
+					<td>
+						<?php if ( '' !== $channel->constant() ) : ?>
+							<code><?php echo esc_html( $channel->constant() ); ?></code>
+						<?php else : ?>
+							<?php echo esc_html__( 'None. Set under "Alert email" above.', 'mail-vitals' ); ?>
+						<?php endif; ?>
+					</td>
 					<td>
 						<?php
 						echo $channel->is_configured()
@@ -499,11 +526,7 @@ final class SettingsPage {
 		<p class="description">
 			<?php echo esc_html__( 'A webhook can be signed: set MAIL_VITALS_WEBHOOK_SECRET and the body is sent with an HMAC-SHA256 signature in the X-Mail-Vitals-Signature header.', 'mail-vitals' ); ?>
 			<br>
-			<?php echo esc_html__( 'Email alerts are only sent over a route other than the one that is failing, so they need both an SMTP server and Brevo set up. With a single route, use Slack or a webhook to hear about its failures. Several addresses can be listed, separated by commas.', 'mail-vitals' ); ?>
-			<br>
 			<code>define( 'MAIL_VITALS_SLACK_WEBHOOK_URL', 'https://hooks.slack.com/services/…' );</code>
-			<br>
-			<code>define( 'MAIL_VITALS_ALERT_EMAIL', 'ops@example.com' );</code>
 		</p>
 
 		<h3><?php echo esc_html__( 'Problems being reported', 'mail-vitals' ); ?></h3>

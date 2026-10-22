@@ -31,7 +31,8 @@ interface Notifier {
 	public function label();
 
 	/**
-	 * Constant in wp-config.php that switches this channel on.
+	 * Constant in wp-config.php that switches this channel on, or an empty
+	 * string for a channel set up on the settings screen.
 	 *
 	 * @return string
 	 */

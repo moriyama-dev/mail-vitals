@@ -29,7 +29,6 @@ define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', dirname( __DIR__ ) . '/vendor/yoast/p
 define( 'MAIL_VITALS_SLACK_WEBHOOK_URL', 'https://hooks.example.test/slack' );
 define( 'MAIL_VITALS_WEBHOOK_URL', 'https://hooks.example.test/webhook' );
 define( 'MAIL_VITALS_WEBHOOK_SECRET', 'test-secret' );
-define( 'MAIL_VITALS_ALERT_EMAIL', 'alerts@example.com, not an address, ops@example.com' );
 define( 'MAIL_VITALS_BREVO_API_KEY', 'test-key' );
 
 require_once $mail_vitals_tests_dir . '/includes/functions.php';
