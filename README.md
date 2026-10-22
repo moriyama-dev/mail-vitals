@@ -88,10 +88,10 @@ Settings → Mail Vitals, "Send log" with at least one failed row whose "Reason"
 column shows a real provider error. Blur or replace real recipient addresses.
 -->
 
-### Sends alerts to Slack or any webhook
+### Sends alerts to Slack, any webhook, or email
 
 When mail starts failing, a notice goes to Slack, to a webhook of your choosing,
-or both.
+by email, or to any combination of them.
 
 An outage at a mail provider fails hundreds of messages at once, so failures are
 grouped by route and kind of problem. One problem produces a few notices, not
@@ -107,7 +107,14 @@ getting through, but the main route needs attention. A message that no route
 delivered is high severity. A message the retry queue gives up on is reported
 too.
 
-Notices never include a recipient or a subject. Email addresses inside error
+An email alert is only ever sent over a route other than the one that is
+failing. A message about SMTP being down, sent over SMTP, would never arrive.
+So email alerts need both SMTP and Brevo set up; on a site with a single route,
+use Slack or a webhook to hear about its failures. For the same reason, a
+message the retry queue gave up on, which every route had just refused, is not
+reported by email.
+
+Notices never include the recipient or subject of the message that failed. Email addresses inside error
 text are masked as `j***@example.com`. Masking is best effort; the full error
 stays in the site's own log.
 
@@ -141,7 +148,8 @@ and requires the `view_site_health_checks` capability.
 
 ## Credentials live in wp-config.php
 
-Passwords, API keys and webhook URLs are read from constants only. There is no
+Passwords, API keys, webhook URLs and the alert address are read from
+constants only. There is no
 field for them in the settings screen because there is no code that stores one
 in the database. The screen shows whether each one is set, never its value.
 
@@ -160,6 +168,9 @@ define( 'MAIL_VITALS_WEBHOOK_URL', 'https://example.com/hooks/mail' );
 
 // Optional. When set, webhook bodies are signed.
 define( 'MAIL_VITALS_WEBHOOK_SECRET', '...' );
+
+// Where email alerts go. Several addresses can be separated by commas.
+define( 'MAIL_VITALS_ALERT_EMAIL', 'ops@example.com' );
 ```
 
 A webhook URL is itself a credential: anyone who has it can post to the
@@ -233,7 +244,6 @@ In development, version 0.1.0. Not yet on WordPress.org.
 
 Planned before the first release:
 
-- Email as an alert channel, sent only over a route other than the failing one
 - Detection of other plugins that also take over sending
 - Checks of the server's own mail setup and of the configured credentials
 - The retry queue on the settings screen (today it is shown in Site Health only)

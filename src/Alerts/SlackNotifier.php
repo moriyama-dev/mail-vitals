@@ -68,6 +68,15 @@ final class SlackNotifier implements Notifier {
 	}
 
 	/**
+	 * Never needed, since every alert is accepted.
+	 *
+	 * @return string
+	 */
+	public function refusal_reason() {
+		return '';
+	}
+
+	/**
 	 * Post the alert.
 	 *
 	 * @param Alert $alert Alert to send.

@@ -25,6 +25,7 @@ final class Channels {
 		return array(
 			new SlackNotifier(),
 			new WebhookNotifier(),
+			new EmailNotifier(),
 		);
 	}
 

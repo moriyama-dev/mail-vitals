@@ -54,6 +54,13 @@ interface Notifier {
 	public function accepts( Alert $alert );
 
 	/**
+	 * Why accepts() turned an alert down, in words for the settings screen.
+	 *
+	 * @return string
+	 */
+	public function refusal_reason();
+
+	/**
 	 * Send an alert.
 	 *
 	 * @param Alert $alert Alert to send.

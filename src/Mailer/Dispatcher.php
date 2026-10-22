@@ -115,6 +115,23 @@ final class Dispatcher {
 	}
 
 	/**
+	 * Routes to send over, the active one first, then its backup.
+	 *
+	 * @return Transport[] Empty when WordPress is left to send on its own.
+	 */
+	public static function routes() {
+		$active = self::active();
+
+		if ( null === $active ) {
+			return array();
+		}
+
+		$backup = self::backup();
+
+		return null === $backup ? array( $active ) : array( $active, $backup );
+	}
+
+	/**
 	 * Every transport this plugin implements.
 	 *
 	 * @return Transport[]

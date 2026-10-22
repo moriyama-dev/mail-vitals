@@ -58,6 +58,15 @@ final class Monitor {
 	private static $held = array();
 
 	/**
+	 * Whether an alert is being sent right now. Mail sent by the email
+	 * channel is not watched, or a failed alert email would raise an alert
+	 * about itself.
+	 *
+	 * @var bool
+	 */
+	private static $delivering = false;
+
+	/**
 	 * Replacement clock, for tests.
 	 *
 	 * @var callable|null
@@ -90,7 +99,7 @@ final class Monitor {
 	 * @return void
 	 */
 	public static function on_failure( $error ) {
-		if ( ! is_wp_error( $error ) || ! self::channels() ) {
+		if ( self::$delivering || ! is_wp_error( $error ) || ! self::channels() ) {
 			return;
 		}
 
@@ -128,7 +137,7 @@ final class Monitor {
 	 * @return void
 	 */
 	public static function on_success( $mail_data ) {
-		if ( ! self::channels() ) {
+		if ( self::$delivering || ! self::channels() ) {
 			return;
 		}
 
@@ -224,11 +233,27 @@ final class Monitor {
 		$results   = array();
 
 		foreach ( self::channels() as $channel ) {
+			/*
+			 * A channel that steps aside, as email does when the route it
+			 * would use is the failing one, is recorded like a failure. The
+			 * settings screen then says why no notice went that way.
+			 */
 			if ( ! $channel->accepts( $alert ) ) {
+				$reason = $channel->refusal_reason();
+
+				/* translators: 1: channel name, 2: reason. */
+				$errors[]                  = sprintf( __( '%1$s: %2$s', 'mail-vitals' ), $channel->label(), $reason );
+				$results[ $channel->id() ] = $reason;
 				continue;
 			}
 
-			$result = $channel->send( $alert );
+			self::$delivering = true;
+
+			try {
+				$result = $channel->send( $alert );
+			} finally {
+				self::$delivering = false;
+			}
 
 			if ( is_wp_error( $result ) ) {
 				$message = $result->get_error_message();

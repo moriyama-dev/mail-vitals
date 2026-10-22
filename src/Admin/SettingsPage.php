@@ -496,7 +496,11 @@ final class SettingsPage {
 		<p class="description">
 			<?php echo esc_html__( 'A webhook can be signed: set MAIL_VITALS_WEBHOOK_SECRET and the body is sent with an HMAC-SHA256 signature in the X-Mail-Vitals-Signature header.', 'mail-vitals' ); ?>
 			<br>
+			<?php echo esc_html__( 'Email alerts are only sent over a route other than the one that is failing, so they need both an SMTP server and Brevo set up. With a single route, use Slack or a webhook to hear about its failures. Several addresses can be listed, separated by commas.', 'mail-vitals' ); ?>
+			<br>
 			<code>define( 'MAIL_VITALS_SLACK_WEBHOOK_URL', 'https://hooks.slack.com/services/…' );</code>
+			<br>
+			<code>define( 'MAIL_VITALS_ALERT_EMAIL', 'ops@example.com' );</code>
 		</p>
 
 		<h3><?php echo esc_html__( 'Problems being reported', 'mail-vitals' ); ?></h3>

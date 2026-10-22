@@ -21,26 +21,29 @@ if ( ! file_exists( $mail_vitals_tests_dir . '/includes/functions.php' ) ) {
 define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', dirname( __DIR__ ) . '/vendor/yoast/phpunit-polyfills' );
 
 /*
- * Alert channels point at a reserved domain, and nothing is allowed to reach
- * it: a test that forgets to intercept a request fails instead of posting.
+ * Every channel and route is configured, pointing at reserved names, and no
+ * request leaves the machine: a test that forgets to intercept one fails
+ * instead of posting. Constants cannot be undefined, so tests choose what is
+ * active through the settings and Monitor::use_channels().
  */
 define( 'MAIL_VITALS_SLACK_WEBHOOK_URL', 'https://hooks.example.test/slack' );
 define( 'MAIL_VITALS_WEBHOOK_URL', 'https://hooks.example.test/webhook' );
 define( 'MAIL_VITALS_WEBHOOK_SECRET', 'test-secret' );
+define( 'MAIL_VITALS_ALERT_EMAIL', 'alerts@example.com, not an address, ops@example.com' );
+define( 'MAIL_VITALS_BREVO_API_KEY', 'test-key' );
 
 require_once $mail_vitals_tests_dir . '/includes/functions.php';
 
 tests_add_filter(
 	'pre_http_request',
-	static function ( $response, $args, $url ) {
-		if ( false === $response && false !== strpos( (string) $url, '.example.test' ) ) {
+	static function ( $response ) {
+		if ( false === $response ) {
 			return new WP_Error( 'mail_vitals_tests_offline', 'Tests do not make network requests.' );
 		}
 
 		return $response;
 	},
-	PHP_INT_MAX,
-	3
+	PHP_INT_MAX
 );
 
 tests_add_filter(

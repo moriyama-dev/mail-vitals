@@ -84,6 +84,15 @@ final class WebhookNotifier implements Notifier {
 	}
 
 	/**
+	 * Never needed, since every alert is accepted.
+	 *
+	 * @return string
+	 */
+	public function refusal_reason() {
+		return '';
+	}
+
+	/**
 	 * Post the alert, signed when a secret is set.
 	 *
 	 * @param Alert $alert Alert to send.

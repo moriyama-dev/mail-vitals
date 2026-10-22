@@ -92,6 +92,15 @@ final class RecordingChannel implements Notifier {
 	}
 
 	/**
+	 * Never needed.
+	 *
+	 * @return string
+	 */
+	public function refusal_reason() {
+		return '';
+	}
+
+	/**
 	 * Keep the alert, or refuse it.
 	 *
 	 * @param Alert $alert Alert.

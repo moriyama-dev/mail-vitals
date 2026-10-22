@@ -74,7 +74,7 @@ final class Delivery {
 			return $short_circuit;
 		}
 
-		$routes = self::routes();
+		$routes = Dispatcher::routes();
 
 		if ( empty( $routes ) ) {
 			return $short_circuit;
@@ -110,25 +110,26 @@ final class Delivery {
 	}
 
 	/**
-	 * Routes to try, the active one first.
+	 * Send over one route only, outside the usual handling.
 	 *
-	 * @return Transport[]
+	 * For the plugin's own alert email, which must travel over a route other
+	 * than the one it reports on. It is not switched to the backup, not
+	 * queued if refused, and not settled with the alert monitor: an alert
+	 * that failed to send is reported to whoever asked for it, not turned
+	 * into a new alert.
+	 *
+	 * @param Transport $route Route to send over.
+	 * @param array     $atts  The arguments for wp_mail().
+	 * @return bool Whether the route accepted the message.
 	 */
-	private static function routes() {
-		$routes = array();
-		$active = Dispatcher::active();
+	public static function send_through( Transport $route, array $atts ) {
+		$was_running   = self::$running;
+		self::$running = true;
 
-		if ( null === $active ) {
-			return $routes;
+		try {
+			return Failover::send( array( $route ), $atts );
+		} finally {
+			self::$running = $was_running;
 		}
-
-		$routes[] = $active;
-		$backup   = Dispatcher::backup();
-
-		if ( null !== $backup ) {
-			$routes[] = $backup;
-		}
-
-		return $routes;
 	}
 }
