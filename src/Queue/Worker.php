@@ -132,8 +132,14 @@ final class Worker {
 		foreach ( Queue::due() as $row ) {
 			$payload = Queue::payload_of( $row );
 
+			/*
+			 * Removing an unreadable row without a word would be exactly the
+			 * silent loss this plugin exists to prevent, so it is given up on
+			 * the same way as any other message, with the reason stated.
+			 */
 			if ( null === $payload ) {
 				Queue::remove( (int) $row['id'] );
+				self::abandon( $row, (int) $row['attempts'], __( 'Could not be sent because its saved contents could no longer be read. The message was not delivered.', 'mail-vitals' ) );
 				++$result['abandoned'];
 				continue;
 			}
@@ -163,15 +169,16 @@ final class Worker {
 				continue;
 			}
 
-			self::record_abandonment( $row );
+			self::abandon(
+				$row,
+				Queue::MAX_ATTEMPTS,
+				sprintf(
+					/* translators: %d: number of attempts made. */
+					__( 'Given up on after %d attempts over every configured route. The message was not delivered.', 'mail-vitals' ),
+					Queue::MAX_ATTEMPTS
+				)
+			);
 			++$result['abandoned'];
-
-			/**
-			 * Fires when the retry queue gives up on a message for good.
-			 *
-			 * @param int $attempts Attempts made before giving up.
-			 */
-			do_action( 'mail_vitals_message_abandoned', Queue::MAX_ATTEMPTS );
 		}
 
 		return $result;
@@ -184,10 +191,12 @@ final class Worker {
 	 * conclusion, because "it failed four times" and "it has been given up on"
 	 * are different facts and only the second one means the message is gone.
 	 *
-	 * @param array $row The queue row being abandoned.
+	 * @param array  $row      The queue row being abandoned.
+	 * @param int    $attempts Attempts made before giving up.
+	 * @param string $reason   Why it will not be tried again.
 	 * @return void
 	 */
-	private static function record_abandonment( array $row ) {
+	private static function abandon( array $row, $attempts, $reason ) {
 		$payload    = Queue::payload_of( $row );
 		$recipients = '';
 
@@ -201,12 +210,15 @@ final class Worker {
 				'transport'  => Dispatcher::current_id(),
 				'recipients' => $recipients,
 				'subject'    => (string) $row['subject'],
-				'error'      => sprintf(
-					/* translators: %d: number of attempts made. */
-					__( 'Given up on after %d attempts over every configured route. The message was not delivered.', 'mail-vitals' ),
-					Queue::MAX_ATTEMPTS
-				),
+				'error'      => $reason,
 			)
 		);
+
+		/**
+		 * Fires when the retry queue gives up on a message for good.
+		 *
+		 * @param int $attempts Attempts made before giving up.
+		 */
+		do_action( 'mail_vitals_message_abandoned', (int) $attempts );
 	}
 }

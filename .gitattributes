@@ -13,3 +13,5 @@
 /bin             export-ignore
 /tests           export-ignore
 /phpunit.xml.dist export-ignore
+/docs            export-ignore
+/README.md       export-ignore
