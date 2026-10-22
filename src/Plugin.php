@@ -8,6 +8,7 @@
 namespace MailVitals;
 
 use MailVitals\Admin\SettingsPage;
+use MailVitals\Admin\TestAlert;
 use MailVitals\Admin\TestSend;
 use MailVitals\Alerts\Monitor;
 use MailVitals\Diagnostics\SiteHealth;
@@ -47,6 +48,7 @@ final class Plugin {
 		if ( is_admin() ) {
 			SettingsPage::register();
 			TestSend::register();
+			TestAlert::register();
 		}
 	}
 }

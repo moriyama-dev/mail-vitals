@@ -7,6 +7,9 @@
 
 namespace MailVitals\Admin;
 
+use MailVitals\Alerts\Alert;
+use MailVitals\Alerts\Channels;
+use MailVitals\Alerts\Monitor;
 use MailVitals\Diagnostics\DomainAuth;
 use MailVitals\Diagnostics\Finding;
 use MailVitals\Mailer\Dispatcher;
@@ -291,6 +294,7 @@ final class SettingsPage {
 
 			<?php self::render_secrets(); ?>
 			<?php self::render_test_form(); ?>
+			<?php self::render_alerts(); ?>
 			<?php self::render_diagnostics(); ?>
 			<?php self::render_log(); ?>
 		</div>
@@ -378,8 +382,9 @@ final class SettingsPage {
 	 */
 	private static function render_secrets() {
 		$secrets = array(
-			'MAIL_VITALS_SMTP_PASSWORD' => Settings::secret( 'smtp_password' ),
-			'MAIL_VITALS_BREVO_API_KEY' => Settings::secret( 'brevo_api_key' ),
+			'MAIL_VITALS_SMTP_PASSWORD'  => Settings::secret( 'smtp_password' ),
+			'MAIL_VITALS_BREVO_API_KEY'  => Settings::secret( 'brevo_api_key' ),
+			'MAIL_VITALS_WEBHOOK_SECRET' => Settings::secret( 'webhook_secret' ),
 		);
 		?>
 		<h2><?php echo esc_html__( 'Credentials', 'mail-vitals' ); ?></h2>
@@ -428,6 +433,112 @@ final class SettingsPage {
 					value="<?php echo esc_attr( $user->user_email ); ?>" required>
 			</p>
 			<?php submit_button( __( 'Send test message', 'mail-vitals' ), 'secondary' ); ?>
+		</form>
+		<?php
+	}
+
+	/**
+	 * Show the alert channels, the problems they are reporting, and a test.
+	 *
+	 * Like the other secrets, the channel URLs are only reported as set or not.
+	 * A webhook URL lets anyone who has it post to the channel.
+	 *
+	 * @return void
+	 */
+	private static function render_alerts() {
+		$channels   = Channels::all();
+		$errors     = Monitor::channel_errors();
+		$incidents  = Monitor::incidents();
+		$configured = Channels::configured();
+		?>
+		<h2><?php echo esc_html__( 'Alerts', 'mail-vitals' ); ?></h2>
+		<p>
+			<?php echo esc_html__( 'When mail starts failing, a notice goes to each channel below: at once, then after 15 minutes, 1 hour and 6 hours, then once a day while the problem lasts, and once more when it is over. Failures for the same reason on the same route count as one problem. Notices carry no recipient or subject, and email addresses in error text are masked.', 'mail-vitals' ); ?>
+		</p>
+		<table class="widefat striped" style="max-width:60em">
+			<thead>
+				<tr>
+					<th><?php echo esc_html__( 'Channel', 'mail-vitals' ); ?></th>
+					<th><?php echo esc_html__( 'Constant in wp-config.php', 'mail-vitals' ); ?></th>
+					<th><?php echo esc_html__( 'Status', 'mail-vitals' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php foreach ( $channels as $channel ) : ?>
+				<tr>
+					<td><?php echo esc_html( $channel->label() ); ?></td>
+					<td><code><?php echo esc_html( $channel->constant() ); ?></code></td>
+					<td>
+						<?php
+						echo $channel->is_configured()
+							? esc_html__( 'Set', 'mail-vitals' )
+							: esc_html__( 'Not set', 'mail-vitals' );
+
+						if ( isset( $errors[ $channel->id() ] ) ) {
+							printf(
+								'<br><span style="color:#b32d2e">%s</span>',
+								esc_html(
+									sprintf(
+										/* translators: 1: date and time, 2: error message. */
+										__( 'Last attempt failed (%1$s): %2$s', 'mail-vitals' ),
+										wp_date( 'Y-m-d H:i', (int) $errors[ $channel->id() ]['at'] ),
+										$errors[ $channel->id() ]['error']
+									)
+								)
+							);
+						}
+						?>
+					</td>
+				</tr>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
+		<p class="description">
+			<?php echo esc_html__( 'A webhook can be signed: set MAIL_VITALS_WEBHOOK_SECRET and the body is sent with an HMAC-SHA256 signature in the X-Mail-Vitals-Signature header.', 'mail-vitals' ); ?>
+			<br>
+			<code>define( 'MAIL_VITALS_SLACK_WEBHOOK_URL', 'https://hooks.slack.com/services/…' );</code>
+		</p>
+
+		<h3><?php echo esc_html__( 'Problems being reported', 'mail-vitals' ); ?></h3>
+		<?php if ( empty( $incidents ) ) : ?>
+			<p><?php echo esc_html__( 'None.', 'mail-vitals' ); ?></p>
+		<?php else : ?>
+			<table class="widefat striped">
+				<thead>
+					<tr>
+						<th><?php echo esc_html__( 'Route', 'mail-vitals' ); ?></th>
+						<th><?php echo esc_html__( 'Problem', 'mail-vitals' ); ?></th>
+						<th><?php echo esc_html__( 'Since', 'mail-vitals' ); ?></th>
+						<th><?php echo esc_html__( 'Failures', 'mail-vitals' ); ?></th>
+						<th><?php echo esc_html__( 'Notices sent', 'mail-vitals' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php foreach ( $incidents as $incident ) : ?>
+					<tr>
+						<td><?php echo esc_html( Alert::route_label( $incident['transport'] ) ); ?></td>
+						<td>
+							<?php echo esc_html( Alert::cause_label( $incident['cause'] ) ); ?>
+							<?php if ( Alert::SEVERITY_LOW === $incident['severity'] ) : ?>
+								<br><?php echo esc_html__( 'Mail is still getting through over the other route.', 'mail-vitals' ); ?>
+							<?php endif; ?>
+							<?php if ( '' !== $incident['notice_error'] ) : ?>
+								<br><span style="color:#b32d2e"><?php echo esc_html( $incident['notice_error'] ); ?></span>
+							<?php endif; ?>
+						</td>
+						<td><?php echo esc_html( wp_date( 'Y-m-d H:i', (int) $incident['first_seen'] ) ); ?></td>
+						<td><?php echo esc_html( number_format_i18n( (int) $incident['total'] ) ); ?></td>
+						<td><?php echo esc_html( number_format_i18n( (int) $incident['notices'] ) ); ?></td>
+					</tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+		<?php endif; ?>
+
+		<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post">
+			<input type="hidden" name="action" value="<?php echo esc_attr( TestAlert::ACTION ); ?>">
+			<?php wp_nonce_field( TestAlert::ACTION ); ?>
+			<?php submit_button( __( 'Send a test alert', 'mail-vitals' ), 'secondary', 'submit', true, empty( $configured ) ? array( 'disabled' => 'disabled' ) : array() ); ?>
 		</form>
 		<?php
 	}
@@ -545,6 +656,22 @@ final class SettingsPage {
 			printf(
 				'<div class="notice notice-error is-dismissible"><p>%s</p></div>',
 				esc_html__( 'The test message was refused. The reason is in the send log, below.', 'mail-vitals' )
+			);
+		}
+
+		$alert = isset( $_GET['mail-vitals-alert'] ) ? sanitize_key( wp_unslash( $_GET['mail-vitals-alert'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading a result flag, not acting on it.
+
+		$notices = array(
+			'sent'   => array( 'success', __( 'The test alert was delivered.', 'mail-vitals' ) ),
+			'failed' => array( 'error', __( 'The test alert could not be delivered. The reason is shown next to each channel under Alerts.', 'mail-vitals' ) ),
+			'none'   => array( 'warning', __( 'No alert channel is set up yet.', 'mail-vitals' ) ),
+		);
+
+		if ( isset( $notices[ $alert ] ) ) {
+			printf(
+				'<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>',
+				esc_attr( $notices[ $alert ][0] ),
+				esc_html( $notices[ $alert ][1] )
 			);
 		}
 	}
