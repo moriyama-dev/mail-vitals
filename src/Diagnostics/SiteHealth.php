@@ -47,6 +47,12 @@ final class SiteHealth {
 			'test'  => array( self::class, 'run_test' ),
 		);
 
+		// Direct: connecting to a route is kept for ten minutes by Probe.
+		$tests['direct']['mail_vitals_mail_setup'] = array(
+			'label' => __( 'Mail setup', 'mail-vitals' ),
+			'test'  => array( self::class, 'run_setup_test' ),
+		);
+
 		// Direct as well: it only reads the hooks already in memory.
 		$tests['direct']['mail_vitals_mail_interference'] = array(
 			'label' => __( 'Other code handling mail', 'mail-vitals' ),
@@ -101,6 +107,44 @@ final class SiteHealth {
 			: __( 'Mail from this site is likely to be rejected', 'mail-vitals' );
 
 		return $result;
+	}
+
+	/**
+	 * Report whether the server and the configured routes can send.
+	 *
+	 * @return array
+	 */
+	public static function run_setup_test() {
+		$findings = MailSetup::run();
+		$statuses = array_map(
+			static function ( Finding $finding ) {
+				return $finding->status();
+			},
+			$findings
+		);
+
+		if ( in_array( Finding::STATUS_CRITICAL, $statuses, true ) ) {
+			$status = 'critical';
+			$label  = __( 'Mail cannot leave this site as it is set up', 'mail-vitals' );
+		} elseif ( in_array( Finding::STATUS_WARNING, $statuses, true ) ) {
+			$status = 'recommended';
+			$label  = __( 'The mail setup has something worth fixing', 'mail-vitals' );
+		} else {
+			$status = 'good';
+			$label  = __( 'The mail setup can send', 'mail-vitals' );
+		}
+
+		return array(
+			'label'       => $label,
+			'status'      => $status,
+			'badge'       => array(
+				'label' => __( 'Email', 'mail-vitals' ),
+				'color' => 'blue',
+			),
+			'description' => self::describe( $findings ),
+			'actions'     => '',
+			'test'        => 'mail_vitals_mail_setup',
+		);
 	}
 
 	/**

@@ -10,6 +10,7 @@ namespace MailVitals;
 use MailVitals\Diagnostics\DomainAuth;
 use MailVitals\Diagnostics\Finding;
 use MailVitals\Diagnostics\MailInterference;
+use MailVitals\Diagnostics\MailSetup;
 use MailVitals\Diagnostics\QueueHealth;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -43,7 +44,7 @@ final class Abilities {
 			'mail-vitals/delivery-health',
 			array(
 				'label'               => __( 'Mail delivery health', 'mail-vitals' ),
-				'description'         => __( 'Reports whether this site\'s sending domain is set up so that the mail it sends will be accepted, and whether other code is taking part in sending it.', 'mail-vitals' ),
+				'description'         => __( 'Reports whether this site\'s sending domain is set up so that the mail it sends will be accepted, and whether other code is taking part in sending it, and whether the server and the configured routes can send.', 'mail-vitals' ),
 				// Core registers only "site" and "user"; mail configuration is
 				// information about the site, so it belongs under "site".
 				'category'            => 'site',
@@ -89,6 +90,7 @@ final class Abilities {
 		$findings   = $check->run( $fresh );
 		$findings[] = QueueHealth::check();
 		$findings[] = MailInterference::check();
+		$findings   = array_merge( $findings, MailSetup::run( $fresh ) );
 
 		$status = Finding::STATUS_GOOD;
 

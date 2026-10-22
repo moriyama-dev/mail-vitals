@@ -13,6 +13,7 @@ use MailVitals\Alerts\Monitor;
 use MailVitals\Diagnostics\DomainAuth;
 use MailVitals\Diagnostics\Finding;
 use MailVitals\Diagnostics\MailInterference;
+use MailVitals\Diagnostics\MailSetup;
 use MailVitals\Diagnostics\QueueHealth;
 use MailVitals\Mailer\Dispatcher;
 use MailVitals\Log\Pruner;
@@ -319,6 +320,7 @@ final class SettingsPage {
 			<?php self::render_secrets(); ?>
 			<?php self::render_test_form(); ?>
 			<?php self::render_alerts(); ?>
+			<?php self::render_setup(); ?>
 			<?php self::render_diagnostics(); ?>
 			<?php self::render_interference(); ?>
 			<?php self::render_queue(); ?>
@@ -676,6 +678,39 @@ final class SettingsPage {
 		$findings = DomainAuth::for_this_site()->run();
 		?>
 		<h2><?php echo esc_html__( 'Domain authentication', 'mail-vitals' ); ?></h2>
+		<table class="widefat striped">
+			<thead>
+				<tr>
+					<th><?php echo esc_html__( 'Check', 'mail-vitals' ); ?></th>
+					<th><?php echo esc_html__( 'Result', 'mail-vitals' ); ?></th>
+					<th><?php echo esc_html__( 'What it means', 'mail-vitals' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php foreach ( $findings as $finding ) : ?>
+				<tr>
+					<td><strong><?php echo esc_html( $finding->label() ); ?></strong></td>
+					<td><?php echo esc_html( self::status_label( $finding->status() ) ); ?></td>
+					<td><?php echo esc_html( $finding->summary() ); ?></td>
+				</tr>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
+		<?php
+	}
+
+	/**
+	 * Show whether the server and the configured routes can send.
+	 *
+	 * @return void
+	 */
+	private static function render_setup() {
+		$findings = MailSetup::run();
+		?>
+		<h2><?php echo esc_html__( 'Server and route setup', 'mail-vitals' ); ?></h2>
+		<p class="description">
+			<?php echo esc_html__( 'Checked without sending anything: routes are connected to and then left, and results are kept for ten minutes.', 'mail-vitals' ); ?>
+		</p>
 		<table class="widefat striped">
 			<thead>
 				<tr>

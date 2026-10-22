@@ -60,6 +60,32 @@ it does not touch sending at all and only records what happens.
 A route that is selected but not fully configured is not used. Half-configured
 delivery fails in ways that are much harder to read than WordPress's default.
 
+### Checks that the server and the routes can actually send
+
+A setting that is filled in is not the same as one that works. Mail Vitals
+looks at what is there, without sending a single message:
+
+- whether PHP's `mail()` has been switched off by the host, and whether the
+  program `sendmail_path` points to exists. This is what WordPress sends with
+  when no route is set up, and on many servers it is not there at all
+- for an SMTP server: whether a username is set without its password, and
+  whether the server answers. It connects, reads the server's greeting and
+  hangs up, which tells a blocked port or a mistyped host from a working
+  server. Logging in is not tried
+- for Brevo: whether the key is an API key rather than Brevo's separate SMTP
+  key, and whether Brevo accepts it, by looking up the account it belongs to
+- a route that is selected but not filled in, which leaves WordPress sending
+  on its own, and keys in `wp-config.php` for a route that is not used
+
+Results are kept for ten minutes, so the settings screen and Site Health do not
+wait on the network every time they are opened.
+
+<!--
+SCREENSHOT: docs/images/server-setup.png
+Settings → Mail Vitals, "Server and route setup" with SMTP selected, showing the
+SMTP server row "answered as a mail server" and the PHP mail() row.
+-->
+
 ### Notices other code that takes over sending
 
 A common way for mail to break without any message is two plugins that both
@@ -180,9 +206,9 @@ the "mail is getting through on SMTP again" notice for the same problem.
 
 On WordPress 6.9 and later, Mail Vitals registers a read-only ability,
 `mail-vitals/delivery-health`, through the Abilities API. It returns the same
-findings as Site Health, the domain checks, the state of the retry queue and
-any other code taking part in sending, and requires the
-`view_site_health_checks` capability.
+findings as Site Health: the domain checks, the state of the retry queue, any
+other code taking part in sending, and the server and route checks. It
+requires the `view_site_health_checks` capability.
 
 ## Setup
 
@@ -290,10 +316,6 @@ tables and options.
 ## Status
 
 In development, version 0.1.0. Not yet on WordPress.org.
-
-Planned before the first release:
-
-- Checks of the server's own mail setup and of the configured credentials
 
 ## Requirements
 

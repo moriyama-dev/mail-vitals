@@ -55,3 +55,22 @@ tests_add_filter(
 require $mail_vitals_tests_dir . '/includes/bootstrap.php';
 
 require_once __DIR__ . '/Support/RecordingChannel.php';
+
+/**
+ * The SMTP check opens sockets, which the HTTP filter above cannot stop. Every
+ * test starts with a connector that goes nowhere; a test that needs answers
+ * puts its own in place and restores this one.
+ *
+ * @return callable
+ */
+function mail_vitals_tests_offline_connector() {
+	return static function () {
+		return array(
+			'status'   => 'unavailable',
+			'greeting' => '',
+			'error'    => 'Tests do not open network connections.',
+		);
+	};
+}
+
+\MailVitals\Diagnostics\Probe::use_connector( mail_vitals_tests_offline_connector() );
