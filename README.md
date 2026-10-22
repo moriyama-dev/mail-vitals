@@ -67,10 +67,20 @@ A message every route refused is kept and tried again after 5 minutes,
 single route. After the last attempt the message is given up on, and the log
 says so in as many words.
 
+The messages waiting, and when each will next be tried, are listed on the
+settings screen. Their bodies are kept only while they wait, and are never
+shown.
+
 Retries run on WP-Cron. Mail Vitals does not ask you to set up a server cron
 job. Instead, it notices when scheduled events have stopped running while
 messages are waiting, which usually means `DISABLE_WP_CRON` was set with
-nothing in its place, and reports it in Site Health.
+nothing in its place, and reports it in Site Health and on the settings screen.
+
+<!--
+SCREENSHOT: docs/images/retry-queue.png
+Settings → Mail Vitals, "Retry queue" with two or three waiting messages, one of
+them showing "In 25 mins" and, ideally, one overdue. Blur real addresses.
+-->
 
 ### Keeps a log, without the message body
 
@@ -246,7 +256,6 @@ Planned before the first release:
 
 - Detection of other plugins that also take over sending
 - Checks of the server's own mail setup and of the configured credentials
-- The retry queue on the settings screen (today it is shown in Site Health only)
 
 ## Requirements
 

@@ -178,6 +178,60 @@ final class Queue {
 	}
 
 	/**
+	 * Messages waiting, the next to be tried first, for the settings screen.
+	 *
+	 * The stored message is read only for its recipients. The body never
+	 * leaves this method, so the screen has no way to show it.
+	 *
+	 * @param int $limit Most to return.
+	 * @return array[] Each with id, queued_at, next_attempt_at (Unix times),
+	 *                 attempts, subject and recipients.
+	 */
+	public static function waiting( $limit = 25 ) {
+		global $wpdb;
+
+		$table = Schema::queue_table();
+
+		if ( ! Schema::exists( $table ) ) {
+			return array();
+		}
+
+		$limit = max( 1, min( 100, (int) $limit ) );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$table} ORDER BY next_attempt_at ASC, id ASC LIMIT %d",
+				$limit
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		if ( ! is_array( $rows ) ) {
+			return array();
+		}
+
+		return array_map(
+			static function ( array $row ) {
+				$payload = self::payload_of( $row );
+				$to      = null !== $payload && isset( $payload['to'] ) ? $payload['to'] : '';
+
+				return array(
+					'id'              => (int) $row['id'],
+					'queued_at'       => (int) strtotime( $row['queued_at'] . ' UTC' ),
+					'next_attempt_at' => (int) strtotime( $row['next_attempt_at'] . ' UTC' ),
+					'attempts'        => (int) $row['attempts'],
+					'subject'         => (string) $row['subject'],
+					'recipients'      => is_array( $to ) ? implode( ', ', $to ) : (string) $to,
+					'readable'        => null !== $payload,
+				);
+			},
+			$rows
+		);
+	}
+
+	/**
 	 * How many messages are waiting.
 	 *
 	 * @return int

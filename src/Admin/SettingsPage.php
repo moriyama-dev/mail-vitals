@@ -12,10 +12,12 @@ use MailVitals\Alerts\Channels;
 use MailVitals\Alerts\Monitor;
 use MailVitals\Diagnostics\DomainAuth;
 use MailVitals\Diagnostics\Finding;
+use MailVitals\Diagnostics\QueueHealth;
 use MailVitals\Mailer\Dispatcher;
 use MailVitals\Log\Pruner;
 use MailVitals\Log\Store;
 use MailVitals\Mailer\Settings;
+use MailVitals\Queue\Queue;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -296,6 +298,7 @@ final class SettingsPage {
 			<?php self::render_test_form(); ?>
 			<?php self::render_alerts(); ?>
 			<?php self::render_diagnostics(); ?>
+			<?php self::render_queue(); ?>
 			<?php self::render_log(); ?>
 		</div>
 		<?php
@@ -544,6 +547,98 @@ final class SettingsPage {
 			<?php wp_nonce_field( TestAlert::ACTION ); ?>
 			<?php submit_button( __( 'Send a test alert', 'mail-vitals' ), 'secondary', 'submit', true, empty( $configured ) ? array( 'disabled' => 'disabled' ) : array() ); ?>
 		</form>
+		<?php
+	}
+
+	/**
+	 * Show the messages waiting to be retried.
+	 *
+	 * Uses the same finding as Site Health for the summary, so the two never
+	 * disagree about whether the queue is stuck.
+	 *
+	 * @return void
+	 */
+	private static function render_queue() {
+		$finding  = QueueHealth::check();
+		$messages = Queue::waiting( 25 );
+		$depth    = Queue::depth();
+		$now      = time();
+		?>
+		<h2><?php echo esc_html__( 'Retry queue', 'mail-vitals' ); ?></h2>
+		<p>
+			<?php if ( Finding::STATUS_CRITICAL === $finding->status() ) : ?>
+				<strong><?php echo esc_html( $finding->summary() ); ?></strong>
+			<?php else : ?>
+				<?php echo esc_html( $finding->summary() ); ?>
+			<?php endif; ?>
+		</p>
+		<?php if ( empty( $messages ) ) : ?>
+			<?php return; ?>
+		<?php endif; ?>
+		<p class="description">
+			<?php
+			printf(
+				/* translators: %d: number of attempts before a message is given up on. */
+				esc_html__( 'Each message is tried again after 5 minutes, 30 minutes, 2 hours and 6 hours, then given up on after %d attempts. Message bodies are kept only while a message waits here, and are not shown.', 'mail-vitals' ),
+				(int) Queue::MAX_ATTEMPTS
+			);
+			?>
+		</p>
+		<table class="widefat striped">
+			<thead>
+				<tr>
+					<th><?php echo esc_html__( 'Queued', 'mail-vitals' ); ?></th>
+					<th><?php echo esc_html__( 'Retries made', 'mail-vitals' ); ?></th>
+					<th><?php echo esc_html__( 'Next attempt', 'mail-vitals' ); ?></th>
+					<th><?php echo esc_html__( 'To', 'mail-vitals' ); ?></th>
+					<th><?php echo esc_html__( 'Subject', 'mail-vitals' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php foreach ( $messages as $message ) : ?>
+				<tr>
+					<td><?php echo esc_html( wp_date( 'Y-m-d H:i', $message['queued_at'] ) ); ?></td>
+					<td>
+						<?php
+						/* translators: 1: retries made so far, 2: the most there will be. */
+						echo esc_html( sprintf( __( '%1$d of %2$d', 'mail-vitals' ), $message['attempts'], Queue::MAX_ATTEMPTS ) );
+						?>
+					</td>
+					<td>
+						<?php
+						if ( $message['next_attempt_at'] > $now ) {
+							/* translators: %s: human-readable duration, such as "25 mins". */
+							echo esc_html( sprintf( __( 'In %s', 'mail-vitals' ), human_time_diff( $now, $message['next_attempt_at'] ) ) );
+						} else {
+							/* translators: %s: human-readable duration, such as "3 hours". */
+							echo esc_html( sprintf( __( 'Due %s ago, waiting for scheduled events to run', 'mail-vitals' ), human_time_diff( $message['next_attempt_at'], $now ) ) );
+						}
+						?>
+					</td>
+					<td>
+						<?php if ( $message['readable'] ) : ?>
+							<?php echo esc_html( $message['recipients'] ); ?>
+						<?php else : ?>
+							<?php echo esc_html__( 'Unreadable. It will be given up on, with the reason in the send log.', 'mail-vitals' ); ?>
+						<?php endif; ?>
+					</td>
+					<td><?php echo esc_html( $message['subject'] ); ?></td>
+				</tr>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
+		<?php if ( $depth > count( $messages ) ) : ?>
+			<p class="description">
+				<?php
+				printf(
+					/* translators: 1: number shown, 2: number waiting in all. */
+					esc_html__( 'Showing the next %1$d of %2$d messages.', 'mail-vitals' ),
+					(int) count( $messages ),
+					(int) $depth
+				);
+				?>
+			</p>
+		<?php endif; ?>
 		<?php
 	}
 
