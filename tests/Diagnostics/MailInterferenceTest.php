@@ -184,6 +184,61 @@ final class MailInterferenceTest extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * A helper that always stops sending is named as such, with both readings:
+	 * intended on a staging site, or the reason mail is not sent. It stays a
+	 * warning, since switching mail off on purpose is common.
+	 *
+	 * @return void
+	 */
+	public function test_a_helper_that_always_stops_is_described_plainly() {
+		add_filter( 'pre_wp_mail', '__return_false' );
+
+		$finding = MailInterference::check();
+
+		$this->assertSame( Finding::STATUS_WARNING, $finding->status() );
+		$this->assertStringContainsString( 'always stops sending, __return_false', $finding->summary() );
+		$this->assertStringContainsString( 'staging', $finding->summary() );
+		$this->assertStringNotContainsString( 'returns anything other than null', $finding->summary(), 'Not hedged when the effect is known.' );
+	}
+
+	/**
+	 * Only WordPress's fixed helpers are called certain. A closure's effect
+	 * cannot be known without running it, and __return_null changes nothing.
+	 *
+	 * @return void
+	 */
+	public function test_only_known_helpers_are_called_certain() {
+		add_filter(
+			'pre_wp_mail',
+			static function () {
+				return false;
+			}
+		);
+		add_filter( 'pre_wp_mail', '__return_null', 5 );
+
+		$finding = MailInterference::check();
+
+		$this->assertStringNotContainsString( 'always stops sending', $finding->summary() );
+		$this->assertStringContainsString( 'returns anything other than null', $finding->summary() );
+		$this->assertFalse(
+			MailInterference::always_stops(
+				array(
+					'hook'     => 'pre_wp_mail',
+					'callback' => '__return_null',
+				)
+			)
+		);
+		$this->assertFalse(
+			MailInterference::always_stops(
+				array(
+					'hook'     => 'phpmailer_init',
+					'callback' => '__return_false',
+				)
+			)
+		);
+	}
+
+	/**
 	 * Order against Mail Vitals' own callback is reported, because on these
 	 * hooks it decides who wins.
 	 *

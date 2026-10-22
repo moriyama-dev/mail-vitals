@@ -179,15 +179,35 @@ final class DomainAuth {
 	 * Check that the sending domain is one that can carry authentication.
 	 *
 	 * A host name with no dot, such as the "localhost" a local install derives,
-	 * is rejected outright by the mail library before anything is sent. This is
-	 * reported first because every later check is meaningless without it.
+	 * is rejected outright by the mail library before anything is sent. An IP
+	 * address, which a site reached by its address rather than a name derives,
+	 * has dots but is no better: no SPF, DKIM or DMARC record can be published
+	 * for it. Either is reported first because every later check is
+	 * meaningless without a domain.
 	 *
 	 * @return Finding
 	 */
 	private function check_domain() {
 		$label = __( 'Sending domain', 'mail-vitals' );
 
-		if ( '' === $this->domain || false === strpos( $this->domain, '.' ) ) {
+		if ( $this->is_ip_address() ) {
+			return new Finding(
+				'sending_domain',
+				$label,
+				Finding::STATUS_CRITICAL,
+				sprintf(
+					/* translators: %s: the IP address in the site's From address. */
+					__( 'Mail is sent from the IP address "%s" instead of a domain. SPF, DKIM and DMARC cannot be set up for an IP address, so most receiving servers reject mail from it. Set a real domain in the From address.', 'mail-vitals' ),
+					$this->domain
+				),
+				array(
+					'domain'     => $this->domain,
+					'ip_address' => true,
+				)
+			);
+		}
+
+		if ( ! $this->is_usable() ) {
 			return new Finding(
 				'sending_domain',
 				$label,
@@ -445,7 +465,7 @@ final class DomainAuth {
 	 * @return Finding|null Null when the check can proceed normally.
 	 */
 	private function unavailable_finding( $id, $label ) {
-		if ( '' === $this->domain || false === strpos( $this->domain, '.' ) ) {
+		if ( ! $this->is_usable() ) {
 			return new Finding(
 				$id,
 				$label,
@@ -466,5 +486,30 @@ final class DomainAuth {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Whether there is a domain worth looking up at all.
+	 *
+	 * @return bool
+	 */
+	private function is_usable() {
+		return '' !== $this->domain && false !== strpos( $this->domain, '.' ) && ! $this->is_ip_address();
+	}
+
+	/**
+	 * Whether the "domain" is really an IP address: IPv4 as it is, IPv6 in
+	 * the square brackets an email address puts around it.
+	 *
+	 * @return bool
+	 */
+	private function is_ip_address() {
+		$host = trim( $this->domain, '[]' );
+
+		if ( 0 === stripos( $host, 'ipv6:' ) ) {
+			$host = substr( $host, 5 );
+		}
+
+		return false !== filter_var( $host, FILTER_VALIDATE_IP );
 	}
 }

@@ -57,6 +57,18 @@ final class MailInterference {
 	);
 
 	/**
+	 * WordPress helpers that return the same non-null value every time.
+	 *
+	 * On pre_wp_mail, each of them stops every message. These are the only
+	 * callbacks whose effect is known without running them; what a closure or
+	 * a plugin's method returns cannot be told from outside, so nothing else
+	 * is described as certain. __return_null is not here: it changes nothing.
+	 *
+	 * @var string[]
+	 */
+	const ALWAYS_STOPS = array( '__return_false', '__return_true', '__return_zero', '__return_empty_string', '__return_empty_array' );
+
+	/**
 	 * Priority Mail Vitals takes over the whole send at.
 	 *
 	 * @var int
@@ -100,6 +112,13 @@ final class MailInterference {
 		$owner    = $replaced ? self::owner_of( $wp_mail_file ) : null;
 		$status   = self::decide( $replaced, $route_active, $callbacks );
 		$hooks    = array_unique( wp_list_pluck( $callbacks, 'hook' ) );
+		$stoppers = array_filter( $callbacks, array( self::class, 'always_stops' ) );
+		$others   = array_filter(
+			$callbacks,
+			static function ( array $callback ) {
+				return 'pre_wp_mail' === $callback['hook'] && ! self::always_stops( $callback );
+			}
+		);
 
 		$detail = array(
 			'route_active' => (bool) $route_active,
@@ -126,7 +145,20 @@ final class MailInterference {
 				: $who . ' ' . __( 'A replacement does not have to report what happened, so messages it sends or fails to send may be missing from the send log.', 'mail-vitals' );
 		}
 
-		if ( in_array( 'pre_wp_mail', $hooks, true ) ) {
+		/*
+		 * Stopping every message is often deliberate, the usual way to keep a
+		 * staging copy of a live site from mailing real customers. So it is
+		 * stated as a fact with both readings, not as a fault.
+		 */
+		if ( $stoppers ) {
+			$sentences[] = sprintf(
+				/* translators: %s: name of the callback, such as __return_false. */
+				__( 'A callback that always stops sending, %s, is attached to pre_wp_mail, so no mail leaves this site. This is a common way to switch mail off on a staging site. If that was intended, nothing needs to change; if it was not, this is why mail is not being sent.', 'mail-vitals' ),
+				implode( ', ', array_unique( wp_list_pluck( $stoppers, 'callback' ) ) )
+			);
+		}
+
+		if ( $others ) {
 			$sentences[] = $route_active
 				? sprintf(
 					/* translators: %d: priority Mail Vitals takes over sending at. */
@@ -641,6 +673,16 @@ final class MailInterference {
 	 */
 	private static function is_own( $file ) {
 		return '' !== $file && null !== self::inside( wp_normalize_path( $file ), MAIL_VITALS_DIR . 'src' );
+	}
+
+	/**
+	 * Whether a reported callback is known to stop every message.
+	 *
+	 * @param array $callback Callback as reported by foreign_callbacks().
+	 * @return bool
+	 */
+	public static function always_stops( array $callback ) {
+		return 'pre_wp_mail' === $callback['hook'] && in_array( $callback['callback'], self::ALWAYS_STOPS, true );
 	}
 
 	/**
