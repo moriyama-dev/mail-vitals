@@ -12,10 +12,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Adds one Site Health test covering mail authentication.
+ * Adds Site Health tests covering mail authentication and other code that
+ * takes part in sending.
  *
  * Site Health is where a site owner already looks when something is wrong, so
  * the findings are reported there rather than behind a menu item of our own.
+ * The two are separate tests because they answer separate questions: whether
+ * receiving servers will trust the mail, and who on this site is sending it.
  */
 final class SiteHealth {
 
@@ -42,6 +45,12 @@ final class SiteHealth {
 		$tests['direct']['mail_vitals_domain_auth'] = array(
 			'label' => __( 'Mail authentication', 'mail-vitals' ),
 			'test'  => array( self::class, 'run_test' ),
+		);
+
+		// Direct as well: it only reads the hooks already in memory.
+		$tests['direct']['mail_vitals_mail_interference'] = array(
+			'label' => __( 'Other code handling mail', 'mail-vitals' ),
+			'test'  => array( self::class, 'run_interference_test' ),
 		);
 
 		return $tests;
@@ -92,6 +101,71 @@ final class SiteHealth {
 			: __( 'Mail from this site is likely to be rejected', 'mail-vitals' );
 
 		return $result;
+	}
+
+	/**
+	 * Report other code that takes part in sending.
+	 *
+	 * @return array
+	 */
+	public static function run_interference_test() {
+		$finding  = MailInterference::check();
+		$statuses = array(
+			Finding::STATUS_GOOD     => 'good',
+			Finding::STATUS_WARNING  => 'recommended',
+			Finding::STATUS_CRITICAL => 'critical',
+		);
+		$labels   = array(
+			Finding::STATUS_GOOD     => __( 'No other code is getting in the way of sending mail', 'mail-vitals' ),
+			Finding::STATUS_WARNING  => __( 'Other code is taking part in sending mail', 'mail-vitals' ),
+			Finding::STATUS_CRITICAL => __( 'wp_mail() is replaced, so the route set in Mail Vitals may never be used', 'mail-vitals' ),
+		);
+		$status   = isset( $statuses[ $finding->status() ] ) ? $finding->status() : Finding::STATUS_GOOD;
+		$detail   = $finding->detail();
+
+		return array(
+			'label'       => $labels[ $status ],
+			'status'      => $statuses[ $status ],
+			'badge'       => array(
+				'label' => __( 'Email', 'mail-vitals' ),
+				'color' => 'blue',
+			),
+			'description' => '<p>' . esc_html( $finding->summary() ) . '</p>' . self::describe_callbacks( $detail['callbacks'] ),
+			'actions'     => '',
+			'test'        => 'mail_vitals_mail_interference',
+		);
+	}
+
+	/**
+	 * Render the callbacks from other code as a list.
+	 *
+	 * @param array $callbacks Callbacks as reported by MailInterference.
+	 * @return string
+	 */
+	private static function describe_callbacks( array $callbacks ) {
+		if ( empty( $callbacks ) ) {
+			return '';
+		}
+
+		$rows = '';
+
+		foreach ( $callbacks as $callback ) {
+			$rows .= sprintf(
+				'<li><code>%1$s</code> %2$s — %3$s (<code>%4$s</code>)</li>',
+				esc_html( $callback['hook'] ),
+				esc_html(
+					sprintf(
+						/* translators: %d: hook priority. */
+						__( 'at priority %d', 'mail-vitals' ),
+						$callback['priority']
+					)
+				),
+				esc_html( $callback['owner'] ),
+				esc_html( '' !== $callback['file'] ? $callback['file'] : $callback['callback'] )
+			);
+		}
+
+		return '<ul>' . $rows . '</ul>';
 	}
 
 	/**

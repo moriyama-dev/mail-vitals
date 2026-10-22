@@ -60,6 +60,42 @@ it does not touch sending at all and only records what happens.
 A route that is selected but not fully configured is not used. Half-configured
 delivery fails in ways that are much harder to read than WordPress's default.
 
+### Notices other code that takes over sending
+
+A common way for mail to break without any message is two plugins that both
+want to send it. One of them wins, and the other's settings still look right.
+
+Mail Vitals does not keep a list of plugin names to look for. It looks at what
+is in place: whether `wp_mail()` is still WordPress's own, and which callbacks
+other code has attached to `pre_wp_mail` and `phpmailer_init`. Each one is
+traced to the file that defines it, and from there to the plugin, must-use
+plugin or theme it belongs to. For each one you see the hook, the priority,
+whether it runs before or after Mail Vitals, and the file. The result is on
+the settings screen and is its own item in **Tools → Site Health**.
+
+What it means depends on the hook:
+
+- a `pre_wp_mail` callback that returns anything other than `null` decides the
+  result of `wp_mail()`, and the message may never reach the route set here,
+  or the send log
+- a `phpmailer_init` callback that runs after Mail Vitals can change the SMTP
+  server, port and login it set
+- a replacement `wp_mail()` does not have to run either hook, so with a route
+  set up this is reported as critical
+
+When Mail Vitals is left on "Leave it to WordPress", another plugin setting up
+the mailer is simply how the site sends, so it is listed without being flagged.
+
+The check sees the hooks as they are when the page loads. Code that attaches
+itself only while a message is being sent does not show up.
+
+<!--
+SCREENSHOT: docs/images/other-code.png
+Settings → Mail Vitals, "Other code handling mail" with a route selected and a
+second SMTP plugin active, so the table lists its phpmailer_init callback with
+priority, "After Mail Vitals" and the file path.
+-->
+
 ### Retries what could not be sent
 
 A message every route refused is kept and tried again after 5 minutes,
@@ -144,8 +180,9 @@ the "mail is getting through on SMTP again" notice for the same problem.
 
 On WordPress 6.9 and later, Mail Vitals registers a read-only ability,
 `mail-vitals/delivery-health`, through the Abilities API. It returns the same
-findings as Site Health, the domain checks and the state of the retry queue,
-and requires the `view_site_health_checks` capability.
+findings as Site Health, the domain checks, the state of the retry queue and
+any other code taking part in sending, and requires the
+`view_site_health_checks` capability.
 
 ## Setup
 
@@ -256,7 +293,6 @@ In development, version 0.1.0. Not yet on WordPress.org.
 
 Planned before the first release:
 
-- Detection of other plugins that also take over sending
 - Checks of the server's own mail setup and of the configured credentials
 
 ## Requirements

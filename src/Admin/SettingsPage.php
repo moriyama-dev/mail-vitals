@@ -12,6 +12,7 @@ use MailVitals\Alerts\Channels;
 use MailVitals\Alerts\Monitor;
 use MailVitals\Diagnostics\DomainAuth;
 use MailVitals\Diagnostics\Finding;
+use MailVitals\Diagnostics\MailInterference;
 use MailVitals\Diagnostics\QueueHealth;
 use MailVitals\Mailer\Dispatcher;
 use MailVitals\Log\Pruner;
@@ -319,6 +320,7 @@ final class SettingsPage {
 			<?php self::render_test_form(); ?>
 			<?php self::render_alerts(); ?>
 			<?php self::render_diagnostics(); ?>
+			<?php self::render_interference(); ?>
 			<?php self::render_queue(); ?>
 			<?php self::render_log(); ?>
 		</div>
@@ -693,6 +695,93 @@ final class SettingsPage {
 			</tbody>
 		</table>
 		<?php
+	}
+
+	/**
+	 * Show which other code takes part in sending, and where.
+	 *
+	 * Each row is one callback, with the file it is defined in, because that
+	 * is what the site owner needs to find and switch off the right thing.
+	 *
+	 * @return void
+	 */
+	private static function render_interference() {
+		$finding   = MailInterference::check();
+		$detail    = $finding->detail();
+		$callbacks = $detail['callbacks'];
+		$runs      = array(
+			'before' => __( 'Before Mail Vitals', 'mail-vitals' ),
+			'after'  => __( 'After Mail Vitals', 'mail-vitals' ),
+		);
+		?>
+		<h2><?php echo esc_html( $finding->label() ); ?></h2>
+		<p>
+			<?php if ( Finding::STATUS_CRITICAL === $finding->status() ) : ?>
+				<strong><?php echo esc_html( $finding->summary() ); ?></strong>
+			<?php else : ?>
+				<?php echo esc_html( $finding->summary() ); ?>
+			<?php endif; ?>
+		</p>
+		<?php if ( empty( $callbacks ) ) : ?>
+			<?php return; ?>
+		<?php endif; ?>
+		<table class="widefat striped">
+			<thead>
+				<tr>
+					<th><?php echo esc_html__( 'Hook', 'mail-vitals' ); ?></th>
+					<th><?php echo esc_html__( 'Priority', 'mail-vitals' ); ?></th>
+					<th><?php echo esc_html__( 'Runs', 'mail-vitals' ); ?></th>
+					<th><?php echo esc_html__( 'Belongs to', 'mail-vitals' ); ?></th>
+					<th><?php echo esc_html__( 'Callback', 'mail-vitals' ); ?></th>
+					<th><?php echo esc_html__( 'File', 'mail-vitals' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php foreach ( $callbacks as $callback ) : ?>
+				<tr>
+					<td><code><?php echo esc_html( $callback['hook'] ); ?></code></td>
+					<td><?php echo esc_html( (string) $callback['priority'] ); ?></td>
+					<td><?php echo isset( $runs[ $callback['runs'] ] ) ? esc_html( $runs[ $callback['runs'] ] ) : '&mdash;'; ?></td>
+					<td><?php echo esc_html( self::owner_label( $callback['owner_type'], $callback['owner'] ) ); ?></td>
+					<td><code><?php echo esc_html( $callback['callback'] ); ?></code></td>
+					<td>
+						<?php if ( '' !== $callback['file'] ) : ?>
+							<code><?php echo esc_html( $callback['line'] > 0 ? $callback['file'] . ':' . $callback['line'] : $callback['file'] ); ?></code>
+						<?php else : ?>
+							<?php echo esc_html__( 'Could not be traced', 'mail-vitals' ); ?>
+						<?php endif; ?>
+					</td>
+				</tr>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
+		<p class="description">
+			<?php echo esc_html__( 'Checked as the hooks stand when this page loads. Code that attaches itself only while a message is being sent does not appear here.', 'mail-vitals' ); ?>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Name of the code a callback belongs to, with what kind of code it is.
+	 *
+	 * @param string $type One of the owner types MailInterference reports.
+	 * @param string $name Display name.
+	 * @return string
+	 */
+	private static function owner_label( $type, $name ) {
+		switch ( $type ) {
+			case 'plugin':
+				/* translators: %s: plugin name. */
+				return sprintf( __( 'Plugin: %s', 'mail-vitals' ), $name );
+			case 'mu-plugin':
+				/* translators: %s: must-use plugin name. */
+				return sprintf( __( 'Must-use plugin: %s', 'mail-vitals' ), $name );
+			case 'theme':
+				/* translators: %s: theme name. */
+				return sprintf( __( 'Theme: %s', 'mail-vitals' ), $name );
+			default:
+				return $name;
+		}
 	}
 
 	/**
