@@ -7,6 +7,7 @@
 
 namespace MailVitals\Mailer;
 
+use MailVitals\Alerts\Monitor;
 use MailVitals\Queue\Queue;
 use MailVitals\Queue\Worker;
 
@@ -52,6 +53,15 @@ final class Delivery {
 	}
 
 	/**
+	 * Whether a message is being worked through the routes right now.
+	 *
+	 * @return bool
+	 */
+	public static function is_handling() {
+		return self::$running;
+	}
+
+	/**
 	 * Send over the active route and its backup, then keep the message if
 	 * both refused it.
 	 *
@@ -71,6 +81,7 @@ final class Delivery {
 		}
 
 		self::$running = true;
+		$sent          = false;
 
 		try {
 			$sent = Failover::send( $routes, is_array( $atts ) ? $atts : array() );
@@ -87,6 +98,9 @@ final class Delivery {
 		} finally {
 			self::$running = false;
 		}
+
+		// Only now is it known whether a failed route cost the message.
+		Monitor::settle( $sent );
 
 		/*
 		 * False even when the message was queued: it has not been delivered,

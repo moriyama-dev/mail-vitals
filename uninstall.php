@@ -24,4 +24,4 @@ if ( ! defined( 'MAIL_VITALS_DIR' ) ) {
 \MailVitals\Log\Schema::drop();
 
 delete_option( \MailVitals\Mailer\Settings::OPTION );
-delete_option( 'mail_vitals_recent_failures' );
+delete_option( \MailVitals\Alerts\Monitor::OPTION );

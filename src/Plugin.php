@@ -9,6 +9,7 @@ namespace MailVitals;
 
 use MailVitals\Admin\SettingsPage;
 use MailVitals\Admin\TestSend;
+use MailVitals\Alerts\Monitor;
 use MailVitals\Diagnostics\SiteHealth;
 use MailVitals\Log\Pruner;
 use MailVitals\Log\Schema;
@@ -39,6 +40,7 @@ final class Plugin {
 		Worker::register();
 
 		Dispatcher::register();
+		Monitor::register();
 		SiteHealth::register();
 		Abilities::register();
 

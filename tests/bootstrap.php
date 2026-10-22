@@ -20,7 +20,28 @@ if ( ! file_exists( $mail_vitals_tests_dir . '/includes/functions.php' ) ) {
 
 define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', dirname( __DIR__ ) . '/vendor/yoast/phpunit-polyfills' );
 
+/*
+ * Alert channels point at a reserved domain, and nothing is allowed to reach
+ * it: a test that forgets to intercept a request fails instead of posting.
+ */
+define( 'MAIL_VITALS_SLACK_WEBHOOK_URL', 'https://hooks.example.test/slack' );
+define( 'MAIL_VITALS_WEBHOOK_URL', 'https://hooks.example.test/webhook' );
+define( 'MAIL_VITALS_WEBHOOK_SECRET', 'test-secret' );
+
 require_once $mail_vitals_tests_dir . '/includes/functions.php';
+
+tests_add_filter(
+	'pre_http_request',
+	static function ( $response, $args, $url ) {
+		if ( false === $response && false !== strpos( (string) $url, '.example.test' ) ) {
+			return new WP_Error( 'mail_vitals_tests_offline', 'Tests do not make network requests.' );
+		}
+
+		return $response;
+	},
+	PHP_INT_MAX,
+	3
+);
 
 tests_add_filter(
 	'muplugins_loaded',
@@ -30,3 +51,5 @@ tests_add_filter(
 );
 
 require $mail_vitals_tests_dir . '/includes/bootstrap.php';
+
+require_once __DIR__ . '/Support/RecordingChannel.php';

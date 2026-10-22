@@ -183,7 +183,13 @@ final class BrevoTransport implements Transport {
 				$code,
 				$reason
 			),
-			array_merge( $atts, array( 'mail_vitals_transport' => $this->id() ) )
+			array_merge(
+				$atts,
+				array(
+					'mail_vitals_transport'   => $this->id(),
+					'mail_vitals_http_status' => $code,
+				)
+			)
 		);
 
 		/** This action is documented in wp-includes/pluggable.php */

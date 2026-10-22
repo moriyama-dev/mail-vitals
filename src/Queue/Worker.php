@@ -165,6 +165,13 @@ final class Worker {
 
 			self::record_abandonment( $row );
 			++$result['abandoned'];
+
+			/**
+			 * Fires when the retry queue gives up on a message for good.
+			 *
+			 * @param int $attempts Attempts made before giving up.
+			 */
+			do_action( 'mail_vitals_message_abandoned', Queue::MAX_ATTEMPTS );
 		}
 
 		return $result;
