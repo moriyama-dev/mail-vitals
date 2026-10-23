@@ -3,11 +3,7 @@
 Finds out why email leaving WordPress does not arrive, and keeps a record of
 what happened to every message the site sends.
 
-<!--
-SCREENSHOT: docs/images/settings-overview.png
-Settings → Mail Vitals, top of the page: "How mail is sent" with SMTP selected,
-and "Who mail comes from" below it. Crop to the first screen.
--->
+![The Mail Vitals settings screen, with SMTP chosen as the way mail is sent](docs/images/settings-overview.png)
 
 ## Why this exists
 
@@ -33,17 +29,9 @@ being rejected.
 The results appear in two places: on the plugin's settings screen, and in
 **Tools → Site Health**, where site owners already look for problems.
 
-<!--
-SCREENSHOT: docs/images/domain-authentication.png
-Settings → Mail Vitals, "Domain authentication" table. Ideally a domain with at
-least one warning (for example DMARC "p=none") so the "What it means" column
-shows an explanation, not only green results.
--->
+![Domain authentication results for SPF, DKIM and DMARC, each with an explanation](docs/images/domain-authentication.png)
 
-<!--
-SCREENSHOT: docs/images/site-health.png
-Tools → Site Health, the "Mail authentication" item expanded.
--->
+![The Mail authentication item in Site Health](docs/images/site-health.png)
 
 ### Sends over SMTP or the Brevo API, with a backup
 
@@ -80,11 +68,7 @@ looks at what is there, without sending a single message:
 Results are kept for ten minutes, so the settings screen and Site Health do not
 wait on the network every time they are opened.
 
-<!--
-SCREENSHOT: docs/images/server-setup.png
-Settings → Mail Vitals, "Server and route setup" with SMTP selected, showing the
-SMTP server row "answered as a mail server" and the PHP mail() row.
--->
+![Server and route setup: PHP mail() not in use, and the SMTP server answering as a mail server](docs/images/server-setup.png)
 
 ### Notices other code that takes over sending
 
@@ -115,12 +99,7 @@ the mailer is simply how the site sends, so it is listed without being flagged.
 The check sees the hooks as they are when the page loads. Code that attaches
 itself only while a message is being sent does not show up.
 
-<!--
-SCREENSHOT: docs/images/other-code.png
-Settings → Mail Vitals, "Other code handling mail" with a route selected and a
-second SMTP plugin active, so the table lists its phpmailer_init callback with
-priority, "After Mail Vitals" and the file path.
--->
+![Other code handling mail: two callbacks from a must-use plugin, with hook, priority and file](docs/images/other-code.png)
 
 ### Retries what could not be sent
 
@@ -138,11 +117,7 @@ job. Instead, it notices when scheduled events have stopped running while
 messages are waiting, which usually means `DISABLE_WP_CRON` was set with
 nothing in its place, and reports it in Site Health and on the settings screen.
 
-<!--
-SCREENSHOT: docs/images/retry-queue.png
-Settings → Mail Vitals, "Retry queue" with two or three waiting messages, one of
-them showing "In 25 mins" and, ideally, one overdue. Blur real addresses.
--->
+![The retry queue, with messages at different retry counts and a warning that scheduled events are not running](docs/images/retry-queue.png)
 
 ### Keeps a log, without the message body
 
@@ -154,11 +129,7 @@ The log is trimmed daily by age and by number of rows. Either limit alone
 leaves a gap: a busy site can pile up millions of rows within the retention
 period, and a quiet site keeps years-old records.
 
-<!--
-SCREENSHOT: docs/images/send-log.png
-Settings → Mail Vitals, "Send log" with at least one failed row whose "Reason"
-column shows a real provider error. Blur or replace real recipient addresses.
--->
+![The send log, showing a refused message with the SMTP error kept verbatim](docs/images/send-log.png)
 
 ### Sends alerts to Slack, any webhook, or email
 
@@ -190,18 +161,7 @@ Notices never include the recipient or subject of the message that failed. Email
 text are masked as `j***@example.com`. Masking is best effort; the full error
 stays in the site's own log.
 
-<!--
-SCREENSHOT: docs/images/alerts-settings.png
-Settings → Mail Vitals, "Alerts" section: the channel table (Slack or Webhook
-set) and the "Problems being reported" table with one open problem.
--->
-
-<!--
-SCREENSHOT: docs/images/slack-alert.png
-Optional; leave this comment out if there is no Slack workspace to take it in.
-A Slack channel showing one "mail is failing on SMTP" notice and, below it,
-the "mail is getting through on SMTP again" notice for the same problem.
--->
+![Alert channels and the problems currently being reported](docs/images/alerts-settings.png)
 
 ### Reports delivery health to agents
 
